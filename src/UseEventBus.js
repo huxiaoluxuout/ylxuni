@@ -83,11 +83,11 @@ export class UseEventBus {
      * @param {Object} config 配置对象
      * @param {string} config.targetPath 目标路径
      * @param {Object} [config.options={}] 传递的数据
-     * @param {string} [config.source=''] 自定义来源名称
+     * @param {string} [config.pageAlias=''] 自定义来源名称
      * @param {boolean} [isNavigationEnabled=false] 是否启用导航
      * @param {string} [navigationType=navigateTo] 导航类型
      */
-    async emit({targetPath, options = {}, source = ''},
+    async emit({targetPath, options = {}, pageAlias = ''},
                isNavigationEnabled = false,
                navigationType = UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO) {
 
@@ -100,7 +100,7 @@ export class UseEventBus {
             targetPath,
             isNavigationEnabled,
             options: mergedOptions,
-            sourceName: source
+            sourceName: pageAlias
         });
 
 
@@ -109,12 +109,12 @@ export class UseEventBus {
     /**
      * 发送全局事件
      * @param {Object} [options={}] 选项参数
-     * @param {String} [source=''] 自定义来源名称
+     * @param {String} [pageAlias=''] 自定义来源名称
      */
-    async emitGlobal(options = {}, source = '') {
+    async emitGlobal(options = {}, pageAlias = '') {
         const currentRoute = await UseEventBus.getRoute();
         const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
-        instanceEventBus.emit({event: 'AppEvent', source: source || currentRoute}, mergedOptions);
+        instanceEventBus.emit({event: 'AppEvent', source: pageAlias || currentRoute}, mergedOptions);
     }
 
     /**
