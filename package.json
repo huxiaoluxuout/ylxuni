@@ -6,7 +6,7 @@
   "module": "./dist/ylxuni.esm.js",
   "type": "module",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c && yalc push"
   },
   "keywords": [],
   "author": "",

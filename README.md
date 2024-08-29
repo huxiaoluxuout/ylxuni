@@ -26,8 +26,8 @@ import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   import {ylxEventBus} from "@/ylxuniCore/useylxuni.js";
 
   onLoad() {
-    ylxEventBus.onGlobal(({args, pageAlias})=>{
-      console.log('ylxEventBus',args[0], pageAlias)
+    ylxEventBus.onGlobal(({args, source})=>{
+      console.log('ylxEventBus',args[0], source)
       /*
         args[0]
           {
@@ -36,7 +36,7 @@ import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
           "color": "red",
           "name": "haha"
         }
-        pageAlias 自定义触发页面的别名 
+        source 自定义触发页面别名 
       */
     })
   }
@@ -70,14 +70,14 @@ function myOrder() {
        name:'haha',
        'setToggle':setToggle
      },
-     pageAlias: '触发页面的别名'
+     source: '触发页面的别名'
    }, true)
 }
 
 // pagesSubMine/myOrder/myOrder.vue
   onLoad() { 
   
-    ylxEventBus.on(({args, pageAlias}) => {
+    ylxEventBus.on(({args, source}) => {
      
     })
     
@@ -98,7 +98,7 @@ function eventBusMine() {
 // pages/mine/mine
 
   onLoad() { 
-    ylxEventBus.on(({args, pageAlias}) => {
+    ylxEventBus.on(({args, source}) => {
      
     })
     
