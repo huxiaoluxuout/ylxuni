@@ -1,6 +1,6 @@
 import {createProxyObject, useInterceptorProxy} from "./utils/tools.js";
 
-let vue3Reactive = null
+
 import {reactive} from 'vue'
 
 export class MustLogIn {
@@ -10,13 +10,12 @@ export class MustLogIn {
     constructor() {
         if (uni) {
             MustLogIn.platform = uni
-            vue3Reactive = reactive
         } else if (wx) {
             MustLogIn.platform = wx
         }
         // vue3 将数据变成响应式
-        if (vue3Reactive) {
-            MustLogIn.loginObject = vue3Reactive(MustLogIn.loginObject)
+        if (reactive) {
+            MustLogIn.loginObject = reactive(MustLogIn.loginObject)
         }
         this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
     }
