@@ -1,8 +1,4 @@
-## 介绍
-
-#### `uniapp`常用方法封装
-
-### 如何使用
+### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxMustLogIn`
 
 #### 复制 `dist/ylxuni.esm.js`文件到项目内。例如：`ylxuniCore`
 
@@ -185,6 +181,7 @@ export default {
 #### `ylxMustLogIn`
 
 ```
+// vue2
 <template>
   <view>
     <button @click="setToggle">login:{{login}}</button>
@@ -253,7 +250,5 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   }
   
 </script>
-<img width="1604" alt="网易游戏印象" src="https://vuemini.org/cases/1.jpg"><p align="center">网易游戏印象</p> 
-https://cdn.nlark.com/yuque/0/2024/png/21700210/1724899227612-cb3eff20-7f04-46ed-8783-ae46b99494ff.png?x-oss-process=image%2Fformat%2Cwebp
-```
 
+```
