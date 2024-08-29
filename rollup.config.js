@@ -10,7 +10,7 @@ export default {
         inlineDynamicImports: true,
     },
 
-    external: ['uni','wx'],
+    external: ['uni','wx','vue'],
     plugins: [
         resolve(),
         commonjs(),

@@ -1,5 +1,8 @@
 import {createProxyObject, useInterceptorProxy} from "./utils/tools.js";
 
+let vue3Reactive = null
+import {reactive} from 'vue'
+
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
@@ -7,8 +10,13 @@ export class MustLogIn {
     constructor() {
         if (uni) {
             MustLogIn.platform = uni
+            vue3Reactive = reactive
         } else if (wx) {
             MustLogIn.platform = wx
+        }
+        // vue3 将数据变成响应式
+        if (vue3Reactive) {
+            MustLogIn.loginObject = vue3Reactive(MustLogIn.loginObject)
         }
         this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
     }
@@ -24,17 +32,6 @@ export class MustLogIn {
                 }
             }
         })
-    }
-
-    setInitLogin(reactive, loginObject) {
-        if (typeof reactive === 'function') {
-            MustLogIn.loginObject = reactive(MustLogIn.loginObject)
-            this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
-        } else {
-            MustLogIn.loginObject = loginObject
-            this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
-        }
-
     }
 
     setLoginToken({tokenKey, tokenData}, callback) {
