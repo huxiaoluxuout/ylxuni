@@ -10,7 +10,10 @@
 ```
 // ylxuniCore/useylxuni.js
 import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
-export const {ylxNextPage,ylxEventBus,ylxMustLogIn} = ylxIntercept()
+const ylxInstance = ylxIntercept()
+
+export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
+export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 ```
 
 ```
@@ -250,5 +253,64 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   }
   
 </script>
+
+```
+```
+import ylxIntercept from "./ylxuni.esm.js"
+
+const ylxInstance = ylxIntercept(wx)
+
+export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
+export const { ylxEventBus, ylxMustLogIn } = ylxInstance
+
+```
+```
+微信原生
+
+
+
+
+ // 递归设置代理对象
+    setWxProxyObject(targetObject, context) {
+        let proxyObject = createProxyObject(targetObject, context);
+        let loginProxyObject = createProxyObject(proxyObject, context);
+
+        this.loginProxyObject=loginProxyObject
+
+        return this.loginProxyObject;
+    }
+    
+    function createProxyObject(targetObject, context) {
+      return new Proxy(targetObject, {
+          set(target, key, value) {
+              target[key] = value;
+              context.setData({ [key]: value });
+              return true;
+          }
+      });
+    }
+    
+    微信原生小程序；
+    Page({
+    data: {
+        
+        openObj: {
+            age: 0,
+            
+        }
+    },
+    onLoad() {
+        this.openObjProxy = setWxProxyObject(this.data.openObj, this);
+    },
+    setToggle() {
+         // 创建并设置代理对象
+         let loginProxyObject = setWxProxyObject({openObj: this.data.openObj}, this)
+        let xxx = ylxMustLogIn.setWxProxyObject(loginProxyObject.openObj, this)
+        xxx.age += 3
+        
+    }
+    
+});
+setToggle创建并设置代理对象，如何优化代码
 
 ```

@@ -6,12 +6,8 @@ const instanceEventBus = new EventBusCore()
 export class UseEventBus {
     static platform = null
 
-    constructor() {
-        if (uni) {
-            UseEventBus.platform = uni
-        } else if (wx) {
-            UseEventBus.platform = wx
-        }
+    constructor(platform) {
+        UseEventBus.platform = platform
     }
 
     // 定义导航类型常量
@@ -35,7 +31,6 @@ export class UseEventBus {
     }
 
     static handlerListener({args, source}) {
-        console.log('handlerListener',args,source)
         let [{navigationType, targetPath, isNavigationEnabled, options, sourceName}] = args
         const {path, query, delimiter} = UseEventBus.parseUrl(targetPath);
         UseEventBus.sendTargetPage(path, source, options, sourceName)

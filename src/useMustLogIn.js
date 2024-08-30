@@ -1,18 +1,33 @@
 import {createProxyObject, useInterceptorProxy} from "./utils/tools.js";
+/*function getMaxDepth(obj) {
+    let maxDepth = 0;
 
+    function findDepth(currentObj, currentDepth) {
+        // 当前递归深度
+        if (typeof currentObj === 'object' && currentObj !== null) {
+            maxDepth = Math.max(maxDepth, currentDepth);
+            for (let key in currentObj) {
+                if (currentObj.hasOwnProperty(key) && typeof currentObj[key] === 'object' && currentObj[key] !== null) {
+                    findDepth(currentObj[key], currentDepth + 1);
+                }
+            }
+        }
+    }
 
-import {reactive} from 'vue'
+    findDepth(obj, 1);
+    return maxDepth;
+}*/
+
+// import {reactive} from 'vue'
+let reactive
 
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
 
-    constructor() {
-        if (uni) {
-            MustLogIn.platform = uni
-        } else if (wx) {
-            MustLogIn.platform = wx
-        }
+    constructor(platform) {
+        MustLogIn.platform = platform
+
         // vue3 将数据变成响应式
         if (reactive) {
             MustLogIn.loginObject = reactive(MustLogIn.loginObject)
@@ -31,6 +46,16 @@ export class MustLogIn {
                 }
             }
         })
+    }
+
+    // 递归设置代理对象
+    setWxProxyObject(targetObject, context) {
+        let proxyObject = createProxyObject(targetObject, context);
+        let loginProxyObject = createProxyObject(proxyObject, context);
+
+        this.loginProxyObject=loginProxyObject
+
+        return this.loginProxyObject;
     }
 
     setLoginToken({tokenKey, tokenData}, callback) {

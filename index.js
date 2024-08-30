@@ -1,5 +1,5 @@
 import {UseEventBus} from "./src/UseEventBus.js";
-import useReachBottom from "./src/useReachBottom.js";
+import {NextPage} from "./src/NextPage.js";
 import {MustLogIn} from "./src/useMustLogIn.js";
 
 /*import {
@@ -9,13 +9,13 @@ import {MustLogIn} from "./src/useMustLogIn.js";
     getLocation,
     openLocation,
     uniBlueTooth,
-} from "./src/authorize/ylxUniApi.js";*/
+} from "./src/authorize/UniApi.js";*/
 
-function initModule() {
+function initModule(platform=uni) {
     return {
-        ylxEventBus: new UseEventBus(),
-        ylxMustLogIn: new MustLogIn(),
-        ylxNextPage: useReachBottom,
+        ylxEventBus: new UseEventBus(platform),
+        ylxMustLogIn: new MustLogIn(platform),
+        ylxNextPage: new NextPage(platform),
         // ylxChooseImage: chooseImage,
         // ylxChooseLocation:chooseLocation,
         // ylxMakePhoneCall:uniMakePhoneCall,
