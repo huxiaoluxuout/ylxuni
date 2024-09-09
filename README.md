@@ -314,3 +314,12 @@ export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 setToggle创建并设置代理对象，如何优化代码
 
 ```
+```
+蓝牙
+
+import YlxBluetoothManager from "dist/ylxuni.bluetooth.esm.js";
+
+const instanceBluetooth = new YlxBluetoothManager()
+
+// instanceBluetooth.
+```

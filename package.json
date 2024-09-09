@@ -6,7 +6,8 @@
   "module": "./dist/ylxuni.esm.js",
   "type": "module",
   "scripts": {
-    "build": "rollup -c && yalc push"
+    "build": "rollup -c",
+    "build:bluetooth": "rollup -c rollup.config.bluetooth.js"
   },
   "keywords": [],
   "author": "",

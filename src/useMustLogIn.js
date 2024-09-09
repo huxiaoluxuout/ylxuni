@@ -1,25 +1,9 @@
-import {createProxyObject, useInterceptorProxy} from "./utils/tools.js";
-/*function getMaxDepth(obj) {
-    let maxDepth = 0;
+import {createProxyObject} from "./utils/createProxyObject.js";
+import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 
-    function findDepth(currentObj, currentDepth) {
-        // 当前递归深度
-        if (typeof currentObj === 'object' && currentObj !== null) {
-            maxDepth = Math.max(maxDepth, currentDepth);
-            for (let key in currentObj) {
-                if (currentObj.hasOwnProperty(key) && typeof currentObj[key] === 'object' && currentObj[key] !== null) {
-                    findDepth(currentObj[key], currentDepth + 1);
-                }
-            }
-        }
-    }
+import {reactive} from 'vue'
 
-    findDepth(obj, 1);
-    return maxDepth;
-}*/
-
-// import {reactive} from 'vue'
-let reactive
+// let reactive
 
 export class MustLogIn {
     static platform = null
@@ -53,7 +37,7 @@ export class MustLogIn {
         let proxyObject = createProxyObject(targetObject, context);
         let loginProxyObject = createProxyObject(proxyObject, context);
 
-        this.loginProxyObject=loginProxyObject
+        this.loginProxyObject = loginProxyObject
 
         return this.loginProxyObject;
     }
@@ -101,7 +85,3 @@ export class MustLogIn {
         return createInterceptor({onSuccess, onError})
     }
 }
-
-
-
-
