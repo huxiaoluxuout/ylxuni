@@ -3,9 +3,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 
 export default {
-    input: './bluetooth.js',
+    input: './chooseImage.js',
     output: {
-        file: 'dist/ylxuni.bluetooth.esm.js',
+        file: 'dist/ylxuni.chooseImage.esm.js',
         format: 'esm',
         inlineDynamicImports: true,
     },
