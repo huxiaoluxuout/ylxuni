@@ -3,8 +3,6 @@ import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 
 import {reactive} from 'vue'
 
-// let reactive
-
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
@@ -25,8 +23,10 @@ export class MustLogIn {
             success: function (res) {
                 if (res.confirm) {
                     console.log('用户点击确定');
+                    MustLogIn.agreeToLogIn()
                 } else if (res.cancel) {
                     console.log('用户点击取消');
+                    MustLogIn.notAgreeToLogIn()
                 }
             }
         })
@@ -55,13 +55,6 @@ export class MustLogIn {
         })
     }
 
-    updateLogin(callback) {
-        this.loginProxyObject.login = true
-        if (typeof callback === 'function') {
-            callback()
-        }
-    }
-
     unSetLoginToken(tokenKey, callback) {
         this.loginProxyObject.login = false
         MustLogIn.platform.removeStorage({
@@ -75,13 +68,31 @@ export class MustLogIn {
     }
 
     /**
+     * 处理用户登录拦截逻辑并返回一个拦截器。
      *
-     * @param onSuccess
-     * @param onError
-     * @returns {(function(...[*]): void)|*}
+     * @param {Object} options - 登录拦截选项。
+     * @param {Function} options.alreadyLoggedIn - 用户已登录时的回调函数，必传。
+     * @param {Object} [options.unLoggedIn=MustLogIn.onError] - 用户未登录时的选项，默认为 MustLogIn.onError。
+     * @param {Function} [options.notToLogIn] - 用户不同意登录时的回调函数，可选，仅当 unLoggedIn 为 MustLogIn.onError 时可用。
+     * @param {Function} [options.toLogIn] - 用户同意登录时的回调函数，可选，仅当 unLoggedIn 为 MustLogIn.onError 时可用。
+     * @returns {(function(...[*]): void)|*} 返回创建的拦截器对象。
      */
-    interceptMastLogIn({onSuccess, onError = MustLogIn.onError}) {
+    interceptMastLogIn({
+                           alreadyLoggedIn = () => {},
+                           unLoggedIn = MustLogIn.onError,
+                           notToLogIn = () => {},
+                           toLogIn = () => {}
+                       }) {
         const {createInterceptor} = useInterceptorProxy(MustLogIn.loginObject)
-        return createInterceptor({onSuccess, onError})
+        // 同意登录
+        MustLogIn.agreeToLogIn = toLogIn
+        // 不同意登录
+        MustLogIn.notAgreeToLogIn = notToLogIn
+        return createInterceptor({
+            onSuccess: alreadyLoggedIn,
+            onError: unLoggedIn
+        })
     }
 }
+
+

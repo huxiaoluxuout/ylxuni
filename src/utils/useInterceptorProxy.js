@@ -16,11 +16,11 @@ export function useInterceptorProxy(targetObject) {
      */
     const createInterceptor = function ({onError, onSuccess}) {
         if (typeof onError !== 'function') {
-            console.error(`${onError}: 必须是函数`);
+            console.error(`${onError}: 1 必须是函数`);
             return;
         }
         if (typeof onSuccess !== 'function') {
-            console.error(`${onSuccess}: 必须是函数`);
+            console.error(`${onSuccess}: 2 必须是函数`);
             return;
         }
 

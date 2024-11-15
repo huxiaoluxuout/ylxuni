@@ -188,7 +188,7 @@ export default {
 // vue2
 <template>
   <view>
-    <button @click="setToggle">login:{{login}}</button>
+    <button @click="setToggle">hasLogin:{{hasLogin}}</button>
 
     <view @click="toPage1">
       <!-- toPage -->
@@ -202,8 +202,13 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   export default {
     data() {
       return {
-        login:ylxMustLogIn.loginProxyObject
+         loginProxy:ylxMustLogIn.loginProxyObject
       }
+    },
+    computed:{
+      hasLogin() {
+        return this.loginProxy.login
+      },
     },
     methods: {
       setToggle() {
@@ -228,11 +233,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
 // vue3
 <template>
   <view>
-    <button @click="setToggle">login:{{login}}</button>
-
-    <view @click="toPage1">
-      <!-- toPage -->
-    </view>
+     <button @click="setToggle">设置登录状态 hasLogin:{{ hasLogin }}</button>
   </view>
 </template>
 <script setup>
@@ -241,17 +242,25 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   
   import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   
-  ylxMustLogIn.setInitLogin(reactive)
-  const login = ref(ylxMustLogIn.loginProxyObject)
-  const instanceMyOrderHandler = ylxMustLogIn.interceptMastLogIn({onSuccess: myOrder})
+  const loginProxy = ref(ylxMustLogIn.loginProxyObject)
+  const instanceMyOrderHandler = ylxMustLogIn.interceptMastLogIn({alreadyLoggedIn: myOrder})
+  const hasLogin = computed(()=>loginProxy.value.login)
   
   function setToggle() {
     ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
   }
   
-  function myOrder() {
-   
+  --------------------------------------------------------
+  function setLoginToken() {
+    const resData = loginRes.data
+      ylxMustLogIn.setLoginToken({
+        tokenKey:'token',
+        tokenData:resData.token
+      },()=>{
+        uni.navigateBack()
+    })
   }
+  
   
 </script>
 
