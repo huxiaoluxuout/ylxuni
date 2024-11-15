@@ -129,16 +129,16 @@ export class UseEventBus {
      */
     on(callback) {
         if (typeof callback !== 'function') return;
-        UseEventBus.getRoute()
-            .then(currentRoute => {
-                if (!UseEventBus.eventBusSet.has(currentRoute)) {
-                    UseEventBus.eventBusSet.add(currentRoute)
-                    // 注册事件
-                    instanceEventBus.on(currentRoute, callback);
-                    // 触发发送数据到目标页面
-                    instanceEventBus.emit('CURRENT_PAGE_EVENT' + currentRoute);
-                }
-            })
+        UseEventBus.getRoute().then(currentRoute => {
+            if (!UseEventBus.eventBusSet.has(currentRoute)) {
+                UseEventBus.eventBusSet.add(currentRoute)
+            }
+            // 注册事件
+            instanceEventBus.on(currentRoute, callback);
+            // 触发发送数据到目标页面
+            instanceEventBus.emit('CURRENT_PAGE_EVENT' + currentRoute);
+
+        })
 
     }
 

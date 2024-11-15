@@ -27,7 +27,8 @@ import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
 ```
 // App.vue
   import {ylxEventBus} from "@/ylxuniCore/useylxuni.js";
-
+  
+// ***  1. ylxEventBus.onGlobal() 
   onLoad() {
     ylxEventBus.onGlobal(({args, source})=>{
       console.log('ylxEventBus',args[0], source)

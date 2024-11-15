@@ -1,48 +1,58 @@
 import {singletonHandler} from "../utils/singletonHandler.js";
 
+
+let searchTimeout = null
+let osName = 'ios'
+
+
 /**
  * @class BluetoothManager
  * 该类用于管理蓝牙设备的连接、搜索和数据通信。
  */
 class BluetoothManager {
     static retryCount = 0
-    static searchTimeout = null
+
     static connectionTimeout = null
-    static osName = 'ios'
     static serviceUUIDs = []
     static filteredBluetoothDevices = [];
 
-    static boundDeviceInfo = {
+
+    static connectDevice = {
         deviceId: '',
         serviceId: '',
-        writeId: '',
-        notifyId: '',
-    };
 
-    constructor(serviceUUIDs = ['0000AF30-0000-1000-8000-00805F9B34FB']) {
+        characteristicUUIds: '',
+        writeUUID: '',
+        notifyUUID: '',
+    }
 
-        BluetoothManager.retryCount = 0;
-        BluetoothManager.serviceUUIDs = serviceUUIDs;
+    constructor(serviceUUIDs = []) {
+
+        // BluetoothManager.retryCount = 0;
+        // BluetoothManager.serviceUUIDs = serviceUUIDs;
+
+        // name 或 advertisServiceUUIDs
 
         uni.getSystemInfo({
-            success: (res) => {
-                BluetoothManager.osName = res.osName
+            success(res) {
+                console.log('getSystemInfo', res)
+                osName = res.osName
             }
         })
     }
 
     /**
      * 初始化蓝牙模块
-     * @param {Function} bleValueCallback - 蓝牙值变化的回调函数
      * @returns {Promise}
      */
-    initializeBluetooth(bleValueCallback = () => {
-    }) {
-        uni.$off('bleVal');
-        uni.$on('bleVal', bleValueCallback);
+
+    init() {
         return new Promise((resolve, reject) => {
             uni.openBluetoothAdapter({
-                success: () => BluetoothManager.startDeviceSearch(resolve, reject),
+                success(res) {
+
+                    BluetoothManager.startDeviceSearch(resolve, reject)
+                },
                 fail: err => {
                     reject(err);
                 }
@@ -56,14 +66,16 @@ class BluetoothManager {
      * @param {Function} reject
      */
     static startDeviceSearch(resolve, reject) {
+
         uni.startBluetoothDevicesDiscovery({
-            services: BluetoothManager.serviceUUIDs,
-            success: () => {
-                BluetoothManager.searchTimeout = setTimeout(() => {
+
+            success() {
+                searchTimeout = setTimeout(() => {
                     BluetoothManager.getBluetoothDevices(resolve, reject);
                 }, 3000);
             },
-            fail: err => {
+
+            fail(err) {
                 reject(err);
                 uni.showToast({
                     icon: "none",
@@ -72,14 +84,6 @@ class BluetoothManager {
                 });
             }
         });
-    }
-
-    /**
-     * 监听蓝牙设备发现事件
-     * @param {Function} callback
-     */
-    static onDeviceFound(callback) {
-        uni.onBluetoothDeviceFound(callback);
     }
 
     /**
@@ -99,21 +103,30 @@ class BluetoothManager {
      */
     static getBluetoothDevices(resolve, reject) {
         uni.getBluetoothDevices({
-            success: res => {
-                if (BluetoothManager.searchTimeout) {
-                    clearTimeout(BluetoothManager.searchTimeout);
+            success(res) {
+                console.log('原始蓝牙列表数据', res)
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
                 }
-                BluetoothManager.filteredBluetoothDevices = res.devices;
-                if (BluetoothManager.filteredBluetoothDevices.length === 0) {
+
+                if (res.devices.length === 0) {
                     reject(new Error('未找到蓝牙设备'));
                     return;
                 }
-                BluetoothManager.filteredBluetoothDevices.forEach(item => {
-                    item.MACID = formatMACAddress(getUniqueIDFromBuffer(item.advertisData));
-                });
-                resolve(BluetoothManager.filteredBluetoothDevices);
+
+                let bluetoothDevices = res.devices.filter(item => (item.name === 'MA5011Pro'||item.localName === 'MA5011Pro'));
+
+                /*   let bluetoothDevices = res.devices.filter(item => {
+                       if (item.name.trim() === 'MA5011Pro') {
+                           if (item.advertisData) {
+                               item.MACID = getUniqueIDFromBuffer(item.advertisData)
+                           }
+                           return item
+                       }
+                   })*/
+                resolve(bluetoothDevices);
             },
-            fail: err => {
+            fail(err) {
                 reject(err);
                 uni.showToast({
                     title: '搜索蓝牙设备失败或附近暂无可用的蓝牙设备',
@@ -145,53 +158,33 @@ class BluetoothManager {
     }
 
     /**
-     * 连接指定蓝牙设备
-     * @param {string} deviceId - 设备ID
-     * @returns {Promise}
-     */
-    connectToDevice(deviceId) {
-        const targetDeviceId = getTargetDeviceId(deviceId, BluetoothManager.filteredBluetoothDevices);
-        if (!targetDeviceId) {
-            return Promise.reject(new Error('无效的设备ID'));
-        }
-        BluetoothManager.boundDeviceInfo.deviceId = targetDeviceId;
-        return new Promise((resolve, reject) => {
-            uni.createBLEConnection({
-                deviceId: BluetoothManager.boundDeviceInfo.deviceId,
-                success: () => {
-                    BluetoothManager.connectionTimeout = setTimeout(() => {
-                        BluetoothManager.getServiceUUIDs(resolve, reject);
-                    }, 500);
-                },
-                fail: err => {
-                    reject(err);
-                }
-            });
-        });
-    }
-
-    /**
      * 获取蓝牙设备的服务UUID
      * @param {Function} resolve
      * @param {Function} reject
      */
+
     static getServiceUUIDs(resolve, reject) {
+        console.log('getServiceUUIDs', BluetoothManager.connectDevice)
         uni.getBLEDeviceServices({
-            deviceId: BluetoothManager.boundDeviceInfo.deviceId,
-            success: res => {
+            deviceId: BluetoothManager.connectDevice.deviceId,
+            success(res) {
                 if (res.services && res.services.length) {
                     BluetoothManager.onConnectionStateChange();
-                    BluetoothManager.boundDeviceInfo.serviceId = res.services[0].uuid;
+                    BluetoothManager.connectDevice.serviceId = res.services[3].uuid;
+
                     BluetoothManager.getCharacteristicUUIDs(resolve, reject);
                     if (BluetoothManager.connectionTimeout) {
                         clearTimeout(BluetoothManager.connectionTimeout);
                     }
                 } else {
+
                     reject(new Error('未找到服务UUID'));
                 }
             },
-            fail: err => {
-                if (BluetoothManager.retryCount < 10) {
+            fail(err) {
+                reject(err);
+
+                /*if (BluetoothManager.retryCount < 10) {
                     this.connectToDevice(BluetoothManager.boundDeviceInfo.deviceId)
                         .then(() => {
                             BluetoothManager.retryCount = 0;
@@ -201,10 +194,11 @@ class BluetoothManager {
                         });
                 } else {
                     reject(err);
-                }
+                }*/
             }
         });
     }
+
 
     /**
      * 获取蓝牙设备的特征UUID，并开始监听
@@ -212,29 +206,37 @@ class BluetoothManager {
      * @param {Function} reject
      */
     static getCharacteristicUUIDs(resolve, reject) {
+        const {deviceId, serviceId} = BluetoothManager.connectDevice;
+        console.log('特征UUID', {deviceId, serviceId})
         uni.getBLEDeviceCharacteristics({
-            deviceId: BluetoothManager.boundDeviceInfo.deviceId,
-            serviceId: BluetoothManager.boundDeviceInfo.serviceId,
-            success: res => {
-                const notifyCharacteristic = res.characteristics.find(item => item.properties.notify);
-                const writeCharacteristic = res.characteristics.find(item => item.properties.write);
+            deviceId,
+            serviceId,
+            success(res) {
+                console.log('获取蓝牙设备的特征UUID', res)
 
-                if (!notifyCharacteristic || !writeCharacteristic) {
+                if (!res.characteristics.length) {
                     reject(new Error('未找到所需的特征UUID'));
                     return;
                 }
 
-                BluetoothManager.boundDeviceInfo.notifyId = notifyCharacteristic.uuid;
-                BluetoothManager.boundDeviceInfo.writeId = writeCharacteristic.uuid;
-                uni.showToast({title: '连接成功', icon: 'none', duration: 800});
-                uni.$emit('connectedBluetooth', BluetoothManager.boundDeviceInfo);
+                BluetoothManager.connectDevice.characteristicUUIds = res.characteristics;
 
-                BluetoothManager.startNotification(resolve, reject);
+                BluetoothManager.connected()
+                resolve(BluetoothManager.connectDevice)
+                // BluetoothManager.startNotify(resolve, reject);
             },
-            fail: err => {
+            fail(err) {
                 reject(err);
             }
         });
+    }
+
+
+    static connected() {
+        console.log('连接成功', BluetoothManager.connectDevice)
+        uni.showToast({title: 'OK', icon: 'none', duration: 1800});
+        uni.$emit('connectedBle', BluetoothManager.connectDevice);
+
     }
 
     /**
@@ -242,67 +244,125 @@ class BluetoothManager {
      * @param {Function} resolve
      * @param {Function} reject
      */
-    static startNotification(resolve, reject) {
-        const {deviceId, serviceId, notifyId} = BluetoothManager.boundDeviceInfo;
+    static startNotify(resolve, reject) {
+        const {deviceId, serviceId, notifyUUID} = BluetoothManager.connectDevice;
         uni.notifyBLECharacteristicValueChange({
             state: true,
             deviceId,
             serviceId,
-            characteristicId: notifyId,
-            success: res => {
-                resolve(res, BluetoothManager.boundDeviceInfo);
-                this.onDataReceived();
+            characteristicId: notifyUUID,
+            success(res) {
+                resolve(res, BluetoothManager.connectDevice);
             },
-            fail: err => {
+            fail(err) {
                 reject(err);
             }
         });
     }
 
     /**
-     * 接收蓝牙设备返回的数据
+     * 连接指定蓝牙设备
+     * @param {string} deviceId - 设备ID
+     * @returns {Promise}
      */
-    onDataReceived() {
-        let fullData = '';
-        const endMarker = ''; // 根据实际情况设置结束标记
-        uni.onBLECharacteristicValueChange(res => {
-            const hexString = ab2hex(res.value);
-            fullData += hexString;
-            if (fullData.endsWith(endMarker)) {
-                uni.$emit('bleVal', fullData);
-                fullData = '';
-            }
+    connect(deviceId) {
+        console.log('deviceId', deviceId)
+
+
+        return new Promise((resolve, reject) => {
+            uni.createBLEConnection({
+                deviceId: deviceId,
+                success: (res) => {
+                    BluetoothManager.connectDevice.deviceId = deviceId
+
+                    BluetoothManager.connectionTimeout = setTimeout(() => {
+                        BluetoothManager.getServiceUUIDs(resolve, reject);
+                    }, 1500);
+
+                    // resolve(res)
+                },
+                fail: err => {
+                    reject(err);
+                }
+            });
         });
+    }
+    // 读取数据
+    static callbackFns = {
+        red: {
+            characteristicId: '',
+            callback: function () {
+
+            }
+        },
+
+        write: {
+            characteristicId: '',
+            callback: function () {
+
+            }
+        }
     }
 
     /**
      * 向蓝牙设备写入指令
      * @param {string} instruction - 指令的16进制字符串
+     * @param {string} writeUUID - 特征UUID
+     * @param {function} [readCallback] - 数据回调
      * @returns {Promise}
      */
-    writeInstructionToDevice(instruction) {
-        const {deviceId, serviceId, writeId} = BluetoothManager.boundDeviceInfo;
-        const arrayBuffer = new Uint8Array(instruction.match(/[\da-f]{2}/gi).map(ii => parseInt(ii, 16))).buffer;
-
+    write(instruction, writeUUID,readCallback) {
+        const {deviceId, serviceId} = BluetoothManager.connectDevice;
+        // console.log('write', instruction, characteristicId)
         return new Promise((resolve, reject) => {
             uni.writeBLECharacteristicValue({
                 deviceId,
                 serviceId,
-                characteristicId: writeId,
-                value: arrayBuffer,
-                success: res => {
-                    resolve(res);
+                characteristicId: writeUUID,
+                value: hexToArrayBuffer(instruction),
+                success(res) {
+                    // console.log('write-------',res)
+                    BluetoothManager.callbackFns.write.characteristicId = writeUUID
+                    BluetoothManager.callbackFns.write.callback = readCallback
+                    resolve(res)
                 },
-                fail: err => {
-                    reject(err);
-                    if (err.errCode === 10006) {
-                        uni.showModal({
-                            content: '连接已断开',
-                            showCancel: false
-                        });
-                    }
-                }
-            });
+                fail(fail) {
+                    reject(fail)
+                },
+            })
+
+        });
+
+    }
+
+
+
+    /**
+     * 读取蓝牙数据
+     * @param {string} readUUID 读取的特征uuid
+     * @param {Function} readCallback
+     * @param {Function} errCallback
+     */
+    read(readUUID,readCallback,errCallback) {
+        if(!BluetoothManager.callbackFns.red.characteristicId){
+            BluetoothManager.onDeviceData();
+
+        }
+        const {deviceId, serviceId} = BluetoothManager.connectDevice;
+        // console.log('read',{deviceId, serviceId})
+        uni.readBLECharacteristicValue({
+            deviceId,
+            serviceId,
+            characteristicId:readUUID,
+            success: (res) => {
+                // console.log('read',res)
+                BluetoothManager.callbackFns.red.characteristicId = readUUID
+                BluetoothManager.callbackFns.red.callback = readCallback
+            },
+            fail: (err) => {
+                console.error('读取数据失败', err);
+                errCallback(err)
+            }
         });
     }
 
@@ -311,17 +371,10 @@ class BluetoothManager {
      * @param {string} deviceId - 设备ID
      * @returns {Promise}
      */
-    disconnectDevice(deviceId) {
-        return new Promise((resolve, reject) => {
-            uni.closeBLEConnection({
-                deviceId,
-                success: res => {
-                    resolve(res);
-                },
-                fail: err => {
-                    reject(err);
-                }
-            });
+    async disconnect(deviceId) {
+        let closeBLEConnection = promisify(uni.closeBLEConnection);
+        return await closeBLEConnection({
+            deviceId,
         });
     }
 
@@ -329,14 +382,70 @@ class BluetoothManager {
      * 关闭蓝牙模块
      * @returns {Promise}
      */
-    closeBluetoothModule() {
-        return new Promise((resolve, reject) => {
-            uni.closeBluetoothAdapter({
-                success: res => resolve(res),
-                fail: err => reject(err)
-            });
+    async close() {
+        let closeBLEConnection = promisify(uni.closeBluetoothAdapter);
+        return await closeBLEConnection({});
+
+    }
+
+    /**
+     * 接收蓝牙设备返回的数据
+     */
+    static onDeviceData() {
+        let fullData = '';
+        const endMarker = '00'; // 根据实际情况设置结束标记
+        uni.onBLECharacteristicValueChange(res => {
+            const hexString = ab2hex(res.value);
+            console.log('hexString',hexString)
+            fullData += hexString;
+            if (fullData.endsWith(endMarker)) {
+                if (BluetoothManager.callbackFns.red.characteristicId === res.characteristicId) {
+                    BluetoothManager.callbackFns.red.callback(fullData)
+                }
+                if (BluetoothManager.callbackFns.write.characteristicId === res.characteristicId) {
+                    BluetoothManager.callbackFns.write.callback(fullData)
+                }
+
+                fullData = '';
+            }
         });
     }
+
+    /**
+     * 十进制数字转换为十六进制
+     * @param {number} decimalNumber
+     * @returns {}
+     *
+     */
+
+    decimalToHexWithPadding(decimalNumber) {
+        if (typeof decimalNumber !== 'number' || !Number.isInteger(decimalNumber)) {
+            throw new Error('Input must be an integer.');
+        }
+
+        // 将十进制数字转换为十六进制，并补足到至少四个字符长度
+        let hexString = decimalNumber.toString(16).toUpperCase().padStart(4, '0');
+
+        // 分割成高八位和低八位
+        let highByte = hexString.slice(0, 2);
+        let lowByte = hexString.slice(2, 4);
+
+        return highByte+lowByte ;
+    }
+}
+
+
+// 返回Promise对象
+ function promisify(api) {
+    return (options, ...params) => {
+        return new Promise((resolve, reject) => {
+            api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
+        });
+    }
+}
+// 16进制转成2进制
+function hexToArrayBuffer(instruction) {
+    return new Uint8Array(instruction.match(/[\da-f]{2}/gi).map(ii => parseInt(ii, 16))).buffer
 }
 
 // 辅助函数
@@ -352,19 +461,6 @@ function formatMACAddress(macAddress) {
     return macAddress.match(/.{1,2}/g).join(':').toUpperCase();
 }
 
-/*function getTargetDeviceId(targetMACAddress, filteredBluetoothDevices) {
-    const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-    if (macRegex.test(targetMACAddress)) {
-        if (this.osName === 'android') {
-            const device = filteredBluetoothDevices.find(item => item.deviceId === targetMACAddress.trim());
-            return device ? targetMACAddress : null;
-        } else if (this.osName === 'ios') {
-            const device = filteredBluetoothDevices.find(item => targetMACAddress.trim() === formatMACAddress(getUniqueIDFromBuffer(item.advertisData)));
-            return device ? device.deviceId : null;
-        }
-    }
-    return targetMACAddress; // 如果不是MAC地址格式，直接返回原值
-}*/
 /**
  * 根据目标 MAC 地址和过滤后的蓝牙设备列表获取目标设备 ID
  * @param {string} targetMACAddress - 目标 MAC 地址
@@ -375,10 +471,10 @@ function getTargetDeviceId(targetMACAddress, filteredBluetoothDevices) {
     const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
     if (macRegex.test(targetMACAddress)) {
         const formattedMACCache = {}; // 缓存格式化后的 MAC 地址
-        if (BluetoothManager.osName === 'android') {
+        if (osName === 'android') {
             const device = filteredBluetoothDevices.find(item => item.deviceId === targetMACAddress.trim());
             return device ? targetMACAddress : null;
-        } else if (BluetoothManager.osName === 'ios') {
+        } else if (osName === 'ios') {
             const deviceMap = new Map(); // 使用 Map 作为哈希表
             for (const device of filteredBluetoothDevices) {
                 const formattedMAC = formattedMACCache[device.advertisData] || (formattedMACCache[device.advertisData] = formatMACAddress(getUniqueIDFromBuffer(device.advertisData)));
@@ -393,10 +489,6 @@ function getTargetDeviceId(targetMACAddress, filteredBluetoothDevices) {
 
 function ab2hex(buffer) {
     return Array.from(new Uint8Array(buffer), bit => ('00' + bit.toString(16)).slice(-2)).join('');
-}
-
-function hex2int(hex) {
-    return parseInt(hex, 16);
 }
 
 
