@@ -1,19 +1,17 @@
 import {createProxyObject} from "./utils/createProxyObject.js";
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
-
-import {reactive} from 'vue'
-
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
 
-    constructor(platform) {
+    constructor(platform,reactive) {
         MustLogIn.platform = platform
 
         // vue3 将数据变成响应式
         if (reactive) {
             MustLogIn.loginObject = reactive(MustLogIn.loginObject)
         }
+
         this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
     }
 
@@ -31,17 +29,6 @@ export class MustLogIn {
             }
         })
     }
-
-    // 递归设置代理对象
-    setWxProxyObject(targetObject, context) {
-        let proxyObject = createProxyObject(targetObject, context);
-        let loginProxyObject = createProxyObject(proxyObject, context);
-
-        this.loginProxyObject = loginProxyObject
-
-        return this.loginProxyObject;
-    }
-
     setLoginToken({tokenKey, tokenData}, callback) {
         this.loginProxyObject.login = true
         MustLogIn.platform.setStorage({

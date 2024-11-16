@@ -6,32 +6,51 @@
 - ylxuniCore
     - useylxuni.js
     - ylxuni.esm.js
+    - ylxuni_wx.cjs.js（微信原生小程序）
+
+---
+### vue3 - `useylxuni.js`
 
 ```
-// ylxuniCore/useylxuni.js
+import {reactive} from 'vue'
 import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
-const ylxInstance = ylxIntercept()
-
+const ylxInstance = ylxIntercept(uni,reactive)
 export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
 export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 ```
 
+### vue2 - `useylxuni.js`
 ```
-import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
+import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
+const ylxInstance = ylxIntercept(uni)
+export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
+export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 ```
+
+### 微信原生小程序 -  `useylxuni.js`
+```
+const ylxIntercept =require("./ylxuni_wx.cjs")
+const ylxInstance = ylxIntercept(wx)
+
+export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
+export const { ylxEventBus, ylxMustLogIn} = ylxInstance
+
+```
+
+---
 
 ### `ylxEventBus`
 
-#### `全局事件`
+#### `全局事件-注册事件` - `App.vue`
 
 ```
-// App.vue
   import {ylxEventBus} from "@/ylxuniCore/useylxuni.js";
   
 // ***  1. ylxEventBus.onGlobal() 
   onLoad() {
     ylxEventBus.onGlobal(({args, source})=>{
       console.log('ylxEventBus',args[0], source)
+      args[0].thenCallback('哈哈哈哈')
       /*
         args[0]
           {
@@ -45,26 +64,36 @@ import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
     })
   }
 ```
-
+#### `全局事件-发送消息` - `index.vue`
 ```
-  // index.vue
-  
    methods: {
      function sendGlobal() {
          ylxEventBus.emitGlobal({
           age:10,
           color:'red',
           name:'haha',
-        },'触发页面的别名')
+        },'触发页面的别名') // ***别名的位置和全局事件不一样
+            .then(res=>{
+                // 由onGlobal触发 args[0].thenCallback('哈哈')
+                 console.log('哈哈')
+             }) 
      }
    }
 ```
 
-#### `页面事件`
+#### `页面事件-注册` - `pagesSubMine/myOrder/myOrder.vue`
+```
+  onLoad() { 
+ 
+    ylxEventBus.on(({args, source}) => {
+        args[0].thenCallback('嘻嘻')
+    })
+    
+  }
+```
+#### `页面事件-发送消息` - `pagesSubMine/myOrder/myOrder.vue`
 
 ```
-// 开启页面跳转
-
 function myOrder() {
    ylxEventBus.emit({
      targetPath: '/pagesSubMine/myOrder/myOrder',
@@ -74,24 +103,17 @@ function myOrder() {
        name:'haha',
        'setToggle':setToggle
      },
-     source: '触发页面的别名'
-   }, true)
+     source: '触发页面的别名' // ***别名的位置和页面事件不一样
+   }).then(res=>{
+                // 由onGlobal触发 args[0].thenCallback('嘻嘻')
+                 console.log('嘻嘻')
+    }) 
 }
 
-// pagesSubMine/myOrder/myOrder.vue
-  onLoad() { 
-  
-    ylxEventBus.on(({args, source}) => {
-     
-    })
-    
-  }
+```
+#### `页面事件-发送消息-` - `开启页面跳转，并跳转到tabbar页面`
 
 ```
-
-```
-// 开启页面跳转，并跳转到tabbar页面
-
 function eventBusMine() {
   ylxEventBus.emit({
   targetPath: '/pages/mine/mine',
@@ -99,21 +121,44 @@ function eventBusMine() {
   }, true, 'switchTab')
 }
 
-// pages/mine/mine
-
-  onLoad() { 
-    ylxEventBus.on(({args, source}) => {
-     
-    })
-    
-  }
 ```
 
-### `ylxNextPage` 触底加载下一页和下拉刷新 `"enablePullDownRefresh": true `
+#### `微信原生小程序 全局事件-注册事件` - `app.js`
 
 ```
-// vue2
+onLaunch: function () {
+  ylxEventBus.onGlobal(({args, source,},) => {
+      console.log('ylxEventBus', args[0])
+      args[0].thenCallback('app.js')
+  })
+}
+
+```
+#### `微信原生小程序 全局事件-发送消息` - `index.js`
+
+```
+//使用 ylxEventBus.emitGlobal
+onLoad: function () {
+   ylxEventBus.emitGlobal({
+          age:10,
+          color:'red',
+          name:'haha',
+      },'优惠券').then(res=>{
+          console.log('emitGlobal',res)
+      })
+}
+```
+
+---
+
+### `ylxNextPage` 
+#### 触底加载下一页和下拉刷新 ` "enablePullDownRefresh": true `
+
+#### vue2 -`ylxNextPage`- `index.vue`
+
+```
 import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
+
 const {mixinReachBottomPullDownRefresh, invokeAllFn, setFun, pageInfoProxy, dataHandler} = ylxNextPage()
 
 export default {
@@ -148,9 +193,8 @@ export default {
 }
 ```
 
+#### vue3  -`ylxNextPage`- `index.vue`
 ```
-// vue3
-
 <script setup>
   import {ref, computed, watch} from 'vue'
   import {onLoad, onReachBottom, onPullDownRefresh} from '@dcloudio/uni-app'
@@ -182,10 +226,62 @@ export default {
 
 ```
 
-#### `ylxMustLogIn`
+#### 微信原生小程序  -`ylxNextPage`- `index.js`
 
 ```
-// vue2
+import {ylxNextPage} from "../../../ylxuniCore/useylxuni";
+
+const {invokeAllFn, setFun, pageInfoProxy, dataHandler, reachBottomHandler, reload} = ylxNextPage(1, 4)
+const app = getApp();
+
+Page({
+
+    data: {
+        couponList: [],
+    },
+    onLoad(options) {
+        setFun(this.getList)
+        // 在合适的时机调用
+        invokeAllFn()
+    },
+
+    // 其他优惠券
+    getList() {
+        apiGetList({
+            page: pageInfoProxy.page,
+            page_size: pageInfoProxy.pageSize
+        }).then((res) => {
+            
+            let resData = res.data
+            let len1 = this.data.couponList.length
+            let len2 = resData.data.length
+            // 判断是否还有下一页数据
+            // let hasNextPage = resData.total > (len1 + len2)
+            this.setData({
+                couponList: dataHandler({data: this.data.couponList, resData: resData.data}, true)
+            })
+            
+        });
+    },
+
+    onPullDownRefresh() {
+        // 下拉重置列表数据
+        reload()
+    },
+
+    onReachBottom() {
+        reachBottomHandler()
+    },
+
+})
+
+```
+---
+### `ylxMustLogIn`
+
+#### vue2 -`ylxMustLogIn`- `index.vue`
+
+```
 <template>
   <view>
     <button @click="setToggle">hasLogin:{{hasLogin}}</button>
@@ -228,9 +324,9 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
 </script>
 
 ```
+#### vue3 - `ylxMustLogIn`- `index.vue`
 
 ```
-// vue3
 <template>
   <view>
      <button @click="setToggle">设置登录状态 hasLogin:{{ hasLogin }}</button>
@@ -260,72 +356,28 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
         uni.navigateBack()
     })
   }
-  
-  
 </script>
 
 ```
-```
-import ylxIntercept from "./ylxuni.esm.js"
-
-const ylxInstance = ylxIntercept(wx)
-
-export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
-export const { ylxEventBus, ylxMustLogIn } = ylxInstance
+####  微信原生小程序 `ylxMustLogIn`
 
 ```
-```
-微信原生
-
-
-
-
- // 递归设置代理对象
-    setWxProxyObject(targetObject, context) {
-        let proxyObject = createProxyObject(targetObject, context);
-        let loginProxyObject = createProxyObject(proxyObject, context);
-
-        this.loginProxyObject=loginProxyObject
-
-        return this.loginProxyObject;
-    }
-    
-    function createProxyObject(targetObject, context) {
-      return new Proxy(targetObject, {
-          set(target, key, value) {
-              target[key] = value;
-              context.setData({ [key]: value });
-              return true;
-          }
-      });
-    }
-    
-    微信原生小程序；
-    Page({
-    data: {
-        
-        openObj: {
-            age: 0,
-            
-        }
+    myOrder() {
+        console.log('登录后才打印。。。。。。')
     },
-    onLoad() {
-        this.openObjProxy = setWxProxyObject(this.data.openObj, this);
+    instanceMyOrderHandler() {
+        ylxMustLogIn.interceptMastLogIn({alreadyLoggedIn: this.myOrder})()
     },
     setToggle() {
-         // 创建并设置代理对象
-         let loginProxyObject = setWxProxyObject({openObj: this.data.openObj}, this)
-        let xxx = ylxMustLogIn.setWxProxyObject(loginProxyObject.openObj, this)
-        xxx.age += 3
-        
+        ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
+        this.setData({
+            hasLogin: ylxMustLogIn.loginProxyObject.login,
+        })
     }
-    
-});
-setToggle创建并设置代理对象，如何优化代码
-
 ```
+---
+#### `蓝牙`
 ```
-蓝牙
 
 import YlxBluetoothManager from "dist/ylxuni.bluetooth.esm.js";
 

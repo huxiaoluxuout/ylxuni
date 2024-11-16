@@ -20,6 +20,9 @@ export class UseEventBus {
 
     // 构造函数，初始化默认的全局回调函数
     static defaultGlobalCallback = ({args, source}) => console.log('AppEvent', {args, source});
+    static defaultThenCallback = () => {
+        console.log('thenCallback')
+    }
 
     /**
      * 注册全局事件监听器
@@ -91,15 +94,16 @@ export class UseEventBus {
 
         const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
 
-        instanceEventBus.emit({event: 'GLOBAL_PAGES_EVENT', source: currentRoute, handler: 'handlerListener'}, {
-            navigationType,
-            targetPath,
-            isNavigationEnabled,
-            options: mergedOptions,
-            sourceName: source
-        });
-
-
+        return new Promise(resolve => {
+            mergedOptions.thenCallback=resolve
+            instanceEventBus.emit({event: 'GLOBAL_PAGES_EVENT', source: currentRoute, handler: 'handlerListener'}, {
+                navigationType,
+                targetPath,
+                isNavigationEnabled,
+                options: mergedOptions,
+                sourceName: source
+            });
+        })
     }
 
     /**
@@ -110,7 +114,10 @@ export class UseEventBus {
     async emitGlobal(options = {}, source = '') {
         const currentRoute = await UseEventBus.getRoute();
         const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
-        instanceEventBus.emit({event: 'AppEvent', source: source || currentRoute}, mergedOptions);
+        return new Promise(resolve => {
+            mergedOptions.thenCallback=resolve
+            instanceEventBus.emit({event: 'AppEvent', source: source || currentRoute}, mergedOptions);
+        });
     }
 
     /**
