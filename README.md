@@ -312,7 +312,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
       },
       
       toPage1(){
-        ylxMustLogIn.interceptMastLogIn({onSuccess:this.toPage})()
+        ylxMustLogIn.interceptMastLogIn({onLoggedIn:this.toPage})()
       },
   
       toPage() {
@@ -339,13 +339,18 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   
   const loginProxy = ref(ylxMustLogIn.loginProxyObject)
-  const instanceMyOrderHandler = ylxMustLogIn.interceptMastLogIn({alreadyLoggedIn: myOrder})
+  const instanceMyOrderHandler = ylxMustLogIn.interceptMastLogIn({onLoggedIn: myOrder})
   const hasLogin = computed(()=>loginProxy.value.login)
   
   function setToggle() {
     ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
   }
-  
+  function interceptToPage(fn,...args) {
+    ylxMustLogIn.interceptMastLogIn({
+      onLoggedIn: ()=>fn(...args),
+      // confirm:  ()=>ylxNavigateTo('/pages/login/login')
+    })()
+  }
   --------------------------------------------------------
   function setLoginToken() {
     const resData = loginRes.data
@@ -355,6 +360,12 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
       },()=>{
         uni.navigateBack()
     })
+  }
+  // 退出
+  function signOut() {
+    ylxMustLogIn.unSetLoginToken(()=>{
+      ylxRedirectTo('/pages/index/index')
+    },'token')
   }
 </script>
 
@@ -366,7 +377,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
         console.log('登录后才打印。。。。。。')
     },
     instanceMyOrderHandler() {
-        ylxMustLogIn.interceptMastLogIn({alreadyLoggedIn: this.myOrder})()
+        ylxMustLogIn.interceptMastLogIn({onLoggedIn: this.myOrder})()
     },
     setToggle() {
         ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
