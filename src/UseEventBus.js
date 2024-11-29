@@ -1,4 +1,5 @@
 import {EventBusCore} from "./EventBusCore.js";
+import {dataTypeJudge} from "./utils/dataTypeJudge.js";
 
 const instanceEventBus = new EventBusCore()
 
@@ -95,7 +96,7 @@ export class UseEventBus {
         const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
 
         return new Promise(resolve => {
-            mergedOptions.thenCallback=resolve
+            mergedOptions.thenCallback = resolve
             instanceEventBus.emit({event: 'GLOBAL_PAGES_EVENT', source: currentRoute, handler: 'handlerListener'}, {
                 navigationType,
                 targetPath,
@@ -115,7 +116,7 @@ export class UseEventBus {
         const currentRoute = await UseEventBus.getRoute();
         const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
         return new Promise(resolve => {
-            mergedOptions.thenCallback=resolve
+            mergedOptions.thenCallback = resolve
             instanceEventBus.emit({event: 'AppEvent', source: source || currentRoute}, mergedOptions);
         });
     }
@@ -147,6 +148,30 @@ export class UseEventBus {
 
         })
 
+    }
+
+    /**
+     * 移除指定事件的监听器
+     * @param {Function} listenerFunction - 可选的监听器函数
+     * @param {Object} options
+     * @param [options.targetPath=''] - 路由事件名称
+     * @param [options.del=false] - 是否删除targetPath事件中的所有监听器函数
+     */
+    off(listenerFunction, {targetPath, del = false}) {
+        if (dataTypeJudge(targetPath, 'undefined')) {
+            UseEventBus.getRoute().then(currentRoute => {
+                instanceEventBus.off(currentRoute, listenerFunction, del)
+            })
+        } else {
+            instanceEventBus.off(targetPath, listenerFunction, del)
+        }
+    }
+
+    /**
+     * 清除所有事件监听器
+     */
+    clear() {
+        instanceEventBus.clear()
     }
 
     /**

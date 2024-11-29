@@ -1,6 +1,7 @@
-import {dataTypeJudge} from "./utils/dataTypeJudge.js";
+/*
+import { dataTypeJudge } from "./utils/dataTypeJudge.js";
 
-export class EventBusCore {
+export class EventBusCore1 {
     constructor() {
         this.eventListeners = new Map();
     }
@@ -17,11 +18,6 @@ export class EventBusCore {
         }
     }
 
-    /**
-     * 为指定事件添加监听器
-     * @param {string} eventName - 事件名称
-     * @param {Function} listenerFunction - 监听器函数
-     */
     on(eventName, listenerFunction) {
         this._validateEventName(eventName);
         this._validateListenerFunction(listenerFunction);
@@ -34,11 +30,6 @@ export class EventBusCore {
         this.eventListeners.get(eventName)[listenerFunction.name] = listenerFunction;
     }
 
-    /**
-     * 为指定事件添加一次性监听器
-     * @param {string} eventName - 事件名称
-     * @param {Function} listenerFunction - 监听器函数
-     */
     once(eventName, listenerFunction) {
         this._validateEventName(eventName);
         this._validateListenerFunction(listenerFunction);
@@ -52,14 +43,6 @@ export class EventBusCore {
         this.on(eventName, onceWrapper);
     }
 
-    /**
-     * 触发指定事件
-     * @param {Object|string} options - 可以是对象或字符串
-     * @param {string} options.event - 当 options 是对象时，event 是必填属性
-     * @param {string} options.source - 当 options 是对象时，source 是必填属性
-     * @param {string} [options.handler] - 当 options 是对象时，handler 是可选属性
-     * @param {...any} args - 任意数量的参数
-     */
     emit(options, ...args) {
         let eventName, handlerName, eventSource;
 
@@ -77,10 +60,11 @@ export class EventBusCore {
 
         const listeners = this.eventListeners.get(eventName);
         if (!listeners) {
+            console.warn(`没有找到事件: ${eventName}`);
             return;
         }
 
-        const eventData = {args, source: eventSource};
+        const eventData = { args, source: eventSource };
 
         if (!handlerName) {
             // 使用 Object.values 遍历 listener 对象，调用所有监听器
@@ -89,17 +73,13 @@ export class EventBusCore {
             const listener = listeners[handlerName];
             if (listener) {
                 listener(eventData);
+            } else {
+                console.warn(`未找到处理函数: ${handlerName} 在事件: ${eventName}`);
             }
         }
     }
 
-    /**
-     * 移除指定事件的监听器
-     * @param {string} eventName - 事件名称
-     * @param {Function} [listenerFunction] - 可选的监听器函数
-     * @param {boolean} [del=false] - eventName中的所有监听器函数
-     */
-    off(eventName, listenerFunction, del) {
+    off(eventName, listenerFunction) {
         this._validateEventName(eventName);
 
         if (!listenerFunction) {
@@ -107,14 +87,7 @@ export class EventBusCore {
         } else if (dataTypeJudge(listenerFunction, 'function')) {
             const listeners = this.eventListeners.get(eventName);
             if (listeners) {
-                if (del) {
-                    Object.keys(listeners).forEach(key => {
-                        delete listeners[key];
-                    });
-                } else {
-                    delete listeners[listenerFunction.name];  // 直接通过函数名删除
-
-                }
+                delete listeners[listenerFunction.name];  // 直接通过函数名删除
             } else {
                 console.warn(`无法移除监听器，事件: ${eventName} 不存在`);
             }
@@ -123,10 +96,8 @@ export class EventBusCore {
         }
     }
 
-    /**
-     * 清除所有事件监听器
-     */
     clear() {
         this.eventListeners.clear();
     }
 }
+*/
