@@ -59,7 +59,7 @@ export class NextPage {
             isNoData = false
             resetPageInfo()
             invokeAllFn();
-            if (typeof callback === 'function') {
+            if (dataTypeJudge(callback, 'function')) {
                 callback()
             }
         }

@@ -1,3 +1,5 @@
+
+## NodeJs 18.12.0
 ### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxMustLogIn`
 
 #### 复制 `dist/ylxuni.esm.js`文件到项目内。例如：`ylxuniCore`

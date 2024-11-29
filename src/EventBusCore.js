@@ -1,3 +1,5 @@
+import {dataTypeJudge} from "./utils/dataTypeJudge.js";
+
 export class EventBusCore {
     constructor() {
         this.eventListeners = new Map();
@@ -10,7 +12,8 @@ export class EventBusCore {
      * @throws {Error} 如果 listenerFunction 不是函数则抛出错误
      */
     on(eventName, listenerFunction) {
-        if (typeof listenerFunction !== 'function') {
+
+        if (!dataTypeJudge(listenerFunction, 'function')) {
             throw new Error(`${listenerFunction} 必须是一个函数`);
         }
         if (!this.eventListeners.has(eventName)) {
@@ -26,7 +29,7 @@ export class EventBusCore {
      * @throws {Error} 如果 listenerFunction 不是函数则抛出错误
      */
     once(eventName, listenerFunction) {
-        if (typeof listenerFunction !== 'function') {
+        if ( !dataTypeJudge(listenerFunction, 'function')) {
             throw new Error(`${listenerFunction} 必须是一个函数`);
         }
         const onceWrapper = (...args) => {
@@ -46,9 +49,10 @@ export class EventBusCore {
      */
     emit(options, ...args) {
         let eventName, handlerName, eventSource;
-        if (typeof options === 'string') {
+
+        if (dataTypeJudge(options, 'string')) {
             eventName = options;
-        } else if (typeof options === 'object') {
+        } else if (dataTypeJudge(options, 'object')) {
             eventName = options.event;
             handlerName = options.handler;
             eventSource = options.source;
@@ -59,7 +63,7 @@ export class EventBusCore {
         const listeners = this.eventListeners.get(eventName);
         if (!listeners) return;
 
-        const eventData = { args, source: eventSource };
+        const eventData = {args, source: eventSource};
 
         if (!handlerName) {
             listeners.forEach(listener => listener(eventData));
@@ -81,7 +85,8 @@ export class EventBusCore {
     off(eventName, listenerFunction) {
         if (!listenerFunction) {
             this.eventListeners.delete(eventName);
-        } else if (typeof listenerFunction === 'function') {
+
+        } else if (dataTypeJudge(listenerFunction, 'function')) {
             const listeners = this.eventListeners.get(eventName);
             if (listeners) {
                 listeners.delete(listenerFunction);

@@ -1,5 +1,6 @@
 import {createProxyObject} from "./utils/createProxyObject.js";
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
+import {dataTypeJudge} from "./utils/dataTypeJudge.js";
 
 export class MustLogIn {
     static platform = null
@@ -44,7 +45,7 @@ export class MustLogIn {
             key: tokenKey,
             data: tokenData,
             success: function () {
-                if (typeof callback === 'function') {
+                if (dataTypeJudge(callback, 'function')) {
                     callback()
                 }
             }
@@ -60,7 +61,7 @@ export class MustLogIn {
         MustLogIn.platform.removeStorage({
             key: tokenKey,
             success: function () {
-                if (typeof callback === 'function') {
+                if (dataTypeJudge(callback, 'function')) {
                     callback()
                 }
             }
