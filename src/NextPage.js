@@ -10,8 +10,9 @@ export class NextPage {
     }
     /**
      * 创建具有刷新和无限滚动功能的分页处理程序。
-     * @param {number} pageNum - 当前页码.
-     * @param {number} pageSizeNum - 分页大小.
+     * @param {object} pageInfo
+     * @param {pageInfo.page}  - 当前页码.
+     * @param {pageInfo.pageSize}  - 分页大小.
      * @returns {{
      *   dataHandler: ((function({data?: [], resData?: []}, boolean=): (*[]))|*),
      *   reload: function(): void,
@@ -27,10 +28,7 @@ export class NextPage {
      *   setFunction: function(fn: Function): void
      * }}
      */
-    useNextPage(pageNum = 1, pageSizeNum = 10,) {
-
-        let page = pageNum
-        let pageSize = pageSizeNum
+    useNextPage(pageInfo) {
 
         let isNoData = false
 
@@ -38,16 +36,13 @@ export class NextPage {
 
 
         const {setFun, addFun, invokeAllFn} = useFunctionQueue()
-        const pageInfo = {
-            page: page,
-            pageSize: pageSize,
-        };
+
         const pageInfoProxy = createProxyObject(pageInfo)
 
 
         function resetPageInfo() {
-            pageInfoProxy.page = page
-            pageInfoProxy.pageSize = pageSize
+            pageInfoProxy.page = pageInfo.page
+            pageInfoProxy.pageSize = pageInfo.pageSize
         }
 
         resetPageInfo()

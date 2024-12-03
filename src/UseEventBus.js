@@ -136,7 +136,14 @@ export class UseEventBus {
      * @param {Function} callback 回调函数
      */
     on(callback) {
+        let fn=callback
         if (typeof callback !== 'function') return;
+        if(callback.name===''){
+            console.log('匿名函数 fn',fn.name)
+        }else {
+
+            console.log('普通函数',callback.name)
+        }
         UseEventBus.getRoute().then(currentRoute => {
             if (!UseEventBus.eventBusSet.has(currentRoute)) {
                 UseEventBus.eventBusSet.add(currentRoute)
@@ -153,7 +160,7 @@ export class UseEventBus {
     /**
      * 移除指定事件的监听器
      * @param {Function} listenerFunction - 可选的监听器函数
-     * @param {Object} options
+     * @param {Object} [options]
      * @param [options.targetPath=''] - 路由事件名称
      * @param [options.del=false] - 是否删除targetPath事件中的所有监听器函数
      */

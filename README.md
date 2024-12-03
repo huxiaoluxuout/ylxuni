@@ -161,7 +161,7 @@ onLoad: function () {
 ```
 import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
 
-const {mixinReachBottomPullDownRefresh, invokeAllFn, setFun, pageInfoProxy, dataHandler} = ylxNextPage()
+const {mixinReachBottomPullDownRefresh, invokeAllFn, setFun, pageInfoProxy, dataHandler} = ylxNextPage({pageSize:10,page:1})
 
 export default {
   mixins: [mixinReachBottomPullDownRefresh],
@@ -202,7 +202,7 @@ export default {
   import {onLoad, onReachBottom, onPullDownRefresh} from '@dcloudio/uni-app'
   import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
   
-  const {setFun,invokeAllFn, pageInfoProxy, dataHandler,reload,reachBottomHandler} = ylxNextPage()
+  const {setFun,invokeAllFn, pageInfoProxy, dataHandler,reload,reachBottomHandler} = ylxNextPage({pageSize:10,page:1})
   
   const incomeList = ref([])
    getNoticeListApi() {
@@ -233,7 +233,7 @@ export default {
 ```
 import {ylxNextPage} from "../../../ylxuniCore/useylxuni";
 
-const {invokeAllFn, setFun, pageInfoProxy, dataHandler, reachBottomHandler, reload} = ylxNextPage(1, 4)
+const {invokeAllFn, setFun, pageInfoProxy, dataHandler, reachBottomHandler, reload} = ylxNextPage({pageSize:10,page:1})
 const app = getApp();
 
 Page({
