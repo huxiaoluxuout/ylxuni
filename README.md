@@ -17,8 +17,8 @@
 import {reactive} from 'vue'
 import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxIntercept(uni,reactive)
-export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
-export const { ylxEventBus, ylxMustLogIn } = ylxInstance
+export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
+
 ```
 
 ### vue2 - `useylxuni.js`
