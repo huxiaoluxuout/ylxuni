@@ -21,9 +21,6 @@ export class UseEventBus {
 
     // 构造函数，初始化默认的全局回调函数
     static defaultGlobalCallback = ({args, source}) => console.log('AppEvent', {args, source});
-    static defaultThenCallback = () => {
-        console.log('thenCallback')
-    }
 
     /**
      * 注册全局事件监听器
