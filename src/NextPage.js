@@ -4,15 +4,16 @@ import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class NextPage {
     static platform = null
+    static pageInfo = {page:1,pageSize:10}
 
     constructor(platform) {
         NextPage.platform = platform
     }
     /**
-     * 创建具有刷新和无限滚动功能的分页处理程序。
+     * 创建具有刷新和无限滚动功能的分页处理程序
      * @param {object} pageInfo
-     * @param {pageInfo.page}  - 当前页码.
-     * @param {pageInfo.pageSize}  - 分页大小.
+     * @param {number} pageInfo.page  -当前页码
+     * @param {number}  pageInfo.pageSize- 分页大小
      * @returns {{
      *   dataHandler: ((function({data?: [], resData?: []}, boolean=): (*[]))|*),
      *   reload: function(): void,
@@ -28,25 +29,27 @@ export class NextPage {
      *   setFunction: function(fn: Function): void
      * }}
      */
-    useNextPage(pageInfo) {
-
+    useNextPage(pageInfo={page:1, pageSize:10}) {
+        if (!dataTypeJudge(pageInfo, 'object')) {
+            pageInfo={page:1, pageSize:10}
+        }
+        if (!pageInfo.page && !pageInfo.pageSize) {
+            pageInfo={page:1, pageSize:10}
+        }
         let isNoData = false
 
         let isByReload = false
 
+        NextPage.pageInfo={...pageInfo}
 
         const {setFun, addFun, invokeAllFn} = useFunctionQueue()
-
         const pageInfoProxy = createProxyObject(pageInfo)
 
-
+        // 重置page
         function resetPageInfo() {
-            pageInfoProxy.page = pageInfo.page
-            pageInfoProxy.pageSize = pageInfo.pageSize
+            pageInfoProxy.page = NextPage.pageInfo.page
+            pageInfoProxy.pageSize = NextPage.pageInfo.pageSize
         }
-
-        resetPageInfo()
-
 
         // 重新加载
         function reloadHandler(callback) {
@@ -133,15 +136,14 @@ export class NextPage {
 
 
         return {
-            mixinReachBottomPullDownRefresh: handleScrollAndRefresh,
-            reachBottomHandler,
-            pageInfoProxy,
-            setFun,
-            addFun,
-            invokeAllFn,
-            reload: reloadHandler,
-            dataHandler: resDataHandler,
-
+            ylxMixins: handleScrollAndRefresh,
+            ylxPageInfo:pageInfoProxy,
+            ylxReachBottom:reachBottomHandler,
+            ylxSetFun:setFun,
+            ylxAddFun:addFun,
+            ylxInvokeFn:invokeAllFn,
+            ylxRefresh: reloadHandler,
+            ylxSetData: resDataHandler
         }
     }
 }

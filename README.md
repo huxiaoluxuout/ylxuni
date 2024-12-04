@@ -25,8 +25,8 @@ export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 ```
 import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxIntercept(uni)
-export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
-export const { ylxEventBus, ylxMustLogIn } = ylxInstance
+
+export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
 ```
 
 ### 微信原生小程序 -  `useylxuni.js`
@@ -34,8 +34,7 @@ export const { ylxEventBus, ylxMustLogIn } = ylxInstance
 const ylxIntercept =require("./ylxuni_wx.cjs")
 const ylxInstance = ylxIntercept(wx)
 
-export const ylxNextPage = ylxInstance.ylxNextPage.useNextPage
-export const { ylxEventBus, ylxMustLogIn} = ylxInstance
+export const { ylxEventBus, ylxMustLogIn,ylxNextPage} = ylxInstance
 
 ```
 
@@ -161,10 +160,11 @@ onLoad: function () {
 ```
 import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
 
-const {mixinReachBottomPullDownRefresh, invokeAllFn, setFun, pageInfoProxy, dataHandler} = ylxNextPage({pageSize:10,page:1})
+const {ylxMixins,ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+
 
 export default {
-  mixins: [mixinReachBottomPullDownRefresh],
+  mixins: [ylxMixins],
   data() {
     return {
       incomeList: [],
@@ -172,22 +172,22 @@ export default {
   },
 
   onLoad() {
-    setFun(this.getNoticeListApi)
-    invokeAllFn()
+    ylxSetFun(this.getNoticeListApi)
+    ylxInvokeFn()
 
   },
   methods: {
 
     getNoticeListApi() {
       getNoticeList({
-        page: pageInfoProxy.page,
-        page_size: pageInfoProxy.pageSize
+        page: ylxPageInfo.page,
+        page_size: ylxPageInfo.pageSize
       }).then(res => {
         let resData = res.data
         let len1 = this.incomeList.length
         let len2 = resData.data.length
         let hasNextPage = resData.total > (len1 + len2)
-        this.incomeList = dataHandler({data: this.incomeList, resData: resData.data}, hasNextPage)
+        this.incomeList = ylxSetData({data: this.incomeList, resData: resData.data}, hasNextPage)
 
       })
     }
@@ -202,27 +202,30 @@ export default {
   import {onLoad, onReachBottom, onPullDownRefresh} from '@dcloudio/uni-app'
   import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
   
-  const {setFun,invokeAllFn, pageInfoProxy, dataHandler,reload,reachBottomHandler} = ylxNextPage({pageSize:10,page:1})
+  const {ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+
   
   const incomeList = ref([])
    getNoticeListApi() {
         getNoticeList({
-          page: pageInfoProxy.page,
-          page_size: pageInfoProxy.pageSize
+          page: ylxPageInfo.page,
+          page_size: ylxPageInfo.pageSize
         }).then(res => {
           let resData = res.data
           let len1 = incomeList.value.length
           let len2 = resData.data.length
           let hasNextPage = resData.total > (len1 + len2)
-          incomeList.value = dataHandler({data: incomeList.value, resData: resData.data}, hasNextPage)
+          incomeList.value = ylxSetData({data: incomeList.value, resData: resData.list}, hasNextPage)
         })
   }
   onLoad(() => {
-    setFun(getNoticeListApi)
-    invokeAllFn()
+    /*------------------------------------------*/
+    ylxSetFun(getNoticeListApi)
+    // 在合适的时机调用
+    ylxInvokeFn()
   })
-  onReachBottom(reachBottomHandler)
-  onPullDownRefresh(reload)   
+  onReachBottom(ylxReachBottom)
+  onPullDownRefresh(ylxRefresh)   
 
 </script>
 
@@ -233,7 +236,6 @@ export default {
 ```
 import {ylxNextPage} from "../../../ylxuniCore/useylxuni";
 
-const {invokeAllFn, setFun, pageInfoProxy, dataHandler, reachBottomHandler, reload} = ylxNextPage({pageSize:10,page:1})
 const app = getApp();
 
 Page({
@@ -242,16 +244,26 @@ Page({
         couponList: [],
     },
     onLoad(options) {
-        setFun(this.getList)
+        const {ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+        this.ylxPageInfo = ylxPageInfo;
+        this.ylxReachBottom = ylxReachBottom;
+        this.ylxSetFun = ylxSetFun;
+        this.ylxAddFun = ylxAddFun;
+        this.ylxInvokeFn = ylxInvokeFn;
+        this.ylxRefresh = ylxRefresh;
+        this.ylxSetData = ylxSetData;
+        /*------------------------------------------*/
+        this.ylxSetFun(this.getList)
         // 在合适的时机调用
-        invokeAllFn()
+        this.ylxInvokeFn()
+        
     },
 
     // 其他优惠券
     getList() {
         apiGetList({
-            page: pageInfoProxy.page,
-            page_size: pageInfoProxy.pageSize
+            page: this.ylxPageInfo.page,
+            page_size: this.ylxPageInfo.pageSize
         }).then((res) => {
             
             let resData = res.data
@@ -259,20 +271,26 @@ Page({
             let len2 = resData.data.length
             // 判断是否还有下一页数据
             // let hasNextPage = resData.total > (len1 + len2)
+            let hasNextPage = false
             this.setData({
-                couponList: dataHandler({data: this.data.couponList, resData: resData.data}, true)
+                couponList:  this.ylxSetData({data: this.data.couponList, resData: resData.data}, hasNextPage)
             })
             
         });
     },
-
+    // 切换
+    onChange(event) {
+        this.setData({active: event.detail.name});
+        // 重置列表数据
+        this.ylxRefresh()
+    },
     onPullDownRefresh() {
-        // 下拉重置列表数据
-        reload()
+        // 重置列表数据
+        this.ylxRefresh()
     },
 
     onReachBottom() {
-        reachBottomHandler()
+        this.ylxReachBottom()
     },
 
 })

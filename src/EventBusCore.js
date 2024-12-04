@@ -107,8 +107,6 @@ export class EventBusCore {
             this.eventListeners.delete(eventName);
         } else if (dataTypeJudge(listenerFunction, 'function')) {
             const listeners = this.eventListeners.get(eventName);
-            console.log('listeners',listeners)
-
             if (listeners) {
                 if (del) {
                     Object.keys(listeners).forEach(key => {
