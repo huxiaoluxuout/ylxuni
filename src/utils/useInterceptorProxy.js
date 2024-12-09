@@ -1,4 +1,6 @@
 import {createProxyObject} from "./createProxyObject.js";
+import {dataTypeJudge} from "./dataTypeJudge.js";
+
 /**
  * 创建一个代理对象的拦截器工具
  * @param {Object} targetObject - 需要代理的目标对象
@@ -15,12 +17,13 @@ export function useInterceptorProxy(targetObject) {
      * @returns {Function} - 包装后的拦截器函数
      */
     const createInterceptor = function ({onError, onSuccess}) {
-        if (typeof onError !== 'function') {
-            console.error(`${onError}: 1 必须是函数`);
+
+        if (dataTypeJudge(onSuccess, 'onSuccess')) {
+            console.error(`${targetObject}: 函数`);
             return;
         }
-        if (typeof onSuccess !== 'function') {
-            console.error(`${onSuccess}: 2 必须是函数`);
+        if (dataTypeJudge(onError, 'function')) {
+            console.error(`${targetObject}: 函数`);
             return;
         }
 

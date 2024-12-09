@@ -4,7 +4,8 @@ import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class NextPage {
     static platform = null
-    static pageInfo = {page: 1, pageSize: 10}
+    static pageInfo = {page:1,pageSize:10}
+
 
     constructor(platform) {
         NextPage.platform = platform
@@ -30,49 +31,47 @@ export class NextPage {
      *   setFunction: function(fn: Function): void
      * }}
      */
-    useNextPage(pageInfo = {page: 1, pageSize: 10}) {
+    useNextPage(pageInfo={page:1, pageSize:10}) {
         const {setFun, addFun, invokeAllFn} = useFunctionQueue()
+
         const ylxAddFun = addFun
         const ylxSetFun = setFun
         const ylxInvokeFn = invokeAllFn
 
         if (!dataTypeJudge(pageInfo, 'object')) {
-            pageInfo = {page: 1, pageSize: 10}
+            pageInfo={page:1, pageSize:10}
         }
         if (!pageInfo.page && !pageInfo.pageSize) {
-            pageInfo = {page: 1, pageSize: 10}
+            pageInfo={page:1, pageSize:10}
         }
+        let isNoData = false
 
         let isByReload = false
 
-        let hasLastPage = false
-
-        NextPage.pageInfo = {...pageInfo}
+        NextPage.pageInfo={...pageInfo}
 
         const pageInfoProxy = createProxyObject(pageInfo)
-        const loadingInfoProxy = createProxyObject({loading:true})
 
         // 重置page
         function resetPageInfo() {
             pageInfoProxy.page = NextPage.pageInfo.page
             pageInfoProxy.pageSize = NextPage.pageInfo.pageSize
-            loadingInfoProxy.loading = true
         }
 
         // 重新加载
-        function reload(callback) {
+        function reloadHandler(callback) {
             isByReload = true
-            hasLastPage = false
+            isNoData = false
             resetPageInfo()
             ylxInvokeFn();
             if (dataTypeJudge(callback, 'function')) {
-                callback(pageInfoProxy)
+                callback()
             }
         }
 
         // 触底加载下一页数据
         function reachBottomHandler() {
-            if (pageInfoProxy.page > 1 && !hasLastPage) {
+            if (pageInfoProxy.page > 1 && !isNoData) {
                 ylxInvokeFn();
             }
         }
@@ -80,8 +79,8 @@ export class NextPage {
         let timeId = 0
 
         // 下拉刷新
-        function pullDownRefres() {
-            reload()
+        function pullDownRefreshHandler() {
+            reloadHandler()
             timeId = setTimeout(() => {
                 NextPage.platform.stopPullDownRefresh();
             }, 2500)
@@ -91,49 +90,46 @@ export class NextPage {
         function resDataHandler({data = [], resData = []}, isNextPage = false) {
             NextPage.platform.stopPullDownRefresh();
             clearTimeout(timeId)
-            loadingInfoProxy.loading = false
 
-            if (!dataTypeJudge(data, 'array')) {
-                return resData
-            }
+            if (dataTypeJudge(data, 'array')) {
+                if (!dataTypeJudge(resData, 'array')) {
+                    console.warn('没有数据要返回空数组！！！')
+                    resData = []
+                }
+                // 修复重新加载时，之前的数据没有清除的bug
+                if (isByReload) {
+                    data = []
+                    isNextPage = true
+                    isByReload = false
+                }
 
-            // 列表返回数据要为数组
-            if (dataTypeJudge(data, 'array') && !dataTypeJudge(resData, 'array')) {
-                console.error(`${resData} must be array !!!`)
-                resData = []
-            }
 
-            // 修复重新加载时，之前的数据没有清除的bug
-            if (isByReload) {
-                data = []
-                isByReload = false
-            }
-
-            // 只有1页数据
-            if (pageInfoProxy.page === 1) {
-                return resData
-            }
-
-            if (isNextPage) {
-                pageInfoProxy.page += 1;
-                return data.concat(resData);
-
-            } else {
-                // 第1次加载最后的一页
-                if (!hasLastPage) {
-                    hasLastPage = true
+                if (isNextPage) {
+                    pageInfoProxy.page += 1;
                     return data.concat(resData);
                 } else {
-                    // 第2次加载最后的一页
-                    let eleLen = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
-                    let len = resData.length
-                    // TODO 待验证
-                    return data.splice(eleLen, len, ...resData)
+                    // 只有一页数据
+                    if (pageInfoProxy.page === 1) {
+                        return resData
+                    } else {
+                        // 这是最后的一页了1
+                        if (!isNoData) {
+                            // console.log('这是最后的一页了----1')
+                            isNoData = true
+                            return data.concat(resData);
+                        } else {
+                            // console.log('这是最后的一页了----2')
+                            return data
+                        }
+                    }
+
                 }
+            } else {
+                return resData
             }
         }
 
-        const ylxMixins = {
+        const handleScrollAndRefresh = {
             onLoad() {
                 resetPageInfo()
             },
@@ -141,20 +137,19 @@ export class NextPage {
                 reachBottomHandler()
             },
             onPullDownRefresh() {
-                pullDownRefres()
+                pullDownRefreshHandler()
             },
         }
 
 
         return {
-            ylxMixins: ylxMixins,
-            ylxPageInfo: pageInfoProxy,
-            ylxLoadingInfo: loadingInfoProxy,
-            ylxReachBottom: reachBottomHandler,
-            ylxSetFun: ylxSetFun,
-            ylxAddFun: ylxAddFun,
-            ylxInvokeFn: ylxInvokeFn,
-            ylxRefresh: reload,
+            ylxMixins: handleScrollAndRefresh,
+            ylxPageInfo:pageInfoProxy,
+            ylxReachBottom:reachBottomHandler,
+            ylxSetFun:ylxSetFun,
+            ylxAddFun:ylxAddFun,
+            ylxInvokeFn:ylxInvokeFn,
+            ylxRefresh: reloadHandler,
             ylxSetData: resDataHandler
         }
     }

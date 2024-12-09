@@ -42,7 +42,6 @@ export class NextPage {
         if (!pageInfo.page && !pageInfo.pageSize) {
             pageInfo = {page: 1, pageSize: 10}
         }
-
         let isByReload = false
 
         let hasLastPage = false
@@ -50,23 +49,22 @@ export class NextPage {
         NextPage.pageInfo = {...pageInfo}
 
         const pageInfoProxy = createProxyObject(pageInfo)
-        const loadingInfoProxy = createProxyObject({loading:true})
 
         // 重置page
         function resetPageInfo() {
             pageInfoProxy.page = NextPage.pageInfo.page
             pageInfoProxy.pageSize = NextPage.pageInfo.pageSize
-            loadingInfoProxy.loading = true
         }
 
         // 重新加载
-        function reload(callback) {
+        function reloadHandler(callback) {
+            console.log('重新加载')
             isByReload = true
             hasLastPage = false
             resetPageInfo()
             ylxInvokeFn();
             if (dataTypeJudge(callback, 'function')) {
-                callback(pageInfoProxy)
+                callback()
             }
         }
 
@@ -80,8 +78,8 @@ export class NextPage {
         let timeId = 0
 
         // 下拉刷新
-        function pullDownRefres() {
-            reload()
+        function pullDownRefreshHandler() {
+            reloadHandler()
             timeId = setTimeout(() => {
                 NextPage.platform.stopPullDownRefresh();
             }, 2500)
@@ -91,15 +89,13 @@ export class NextPage {
         function resDataHandler({data = [], resData = []}, isNextPage = false) {
             NextPage.platform.stopPullDownRefresh();
             clearTimeout(timeId)
-            loadingInfoProxy.loading = false
 
             if (!dataTypeJudge(data, 'array')) {
                 return resData
             }
 
-            // 列表返回数据要为数组
             if (dataTypeJudge(data, 'array') && !dataTypeJudge(resData, 'array')) {
-                console.error(`${resData} must be array !!!`)
+                console.warn('列表数据要为空数组！！！')
                 resData = []
             }
 
@@ -109,7 +105,7 @@ export class NextPage {
                 isByReload = false
             }
 
-            // 只有1页数据
+            // 只有一页数据
             if (pageInfoProxy.page === 1) {
                 return resData
             }
@@ -125,15 +121,15 @@ export class NextPage {
                     return data.concat(resData);
                 } else {
                     // 第2次加载最后的一页
-                    let eleLen = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
+                    let allLen = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
                     let len = resData.length
-                    // TODO 待验证
-                    return data.splice(eleLen, len, ...resData)
+
+                    return data.splice(allLen, len, ...resData)
                 }
             }
         }
 
-        const ylxMixins = {
+        const handleScrollAndRefresh = {
             onLoad() {
                 resetPageInfo()
             },
@@ -141,20 +137,19 @@ export class NextPage {
                 reachBottomHandler()
             },
             onPullDownRefresh() {
-                pullDownRefres()
+                pullDownRefreshHandler()
             },
         }
 
 
         return {
-            ylxMixins: ylxMixins,
+            ylxMixins: handleScrollAndRefresh,
             ylxPageInfo: pageInfoProxy,
-            ylxLoadingInfo: loadingInfoProxy,
             ylxReachBottom: reachBottomHandler,
-            ylxSetFun: ylxSetFun,
-            ylxAddFun: ylxAddFun,
-            ylxInvokeFn: ylxInvokeFn,
-            ylxRefresh: reload,
+            ylxSetFun:ylxSetFun,
+            ylxAddFun:ylxAddFun,
+            ylxInvokeFn:ylxInvokeFn,
+            ylxRefresh: reloadHandler,
             ylxSetData: resDataHandler
         }
     }
