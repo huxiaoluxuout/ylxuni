@@ -332,7 +332,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
       },
       
       toPage1(){
-        ylxMustLogIn.interceptMastLogIn({onLoggedIn:this.toPage})()
+        ylxMustLogIn.intercept({success:this.toPage})()
       },
   
       toPage() {
@@ -359,16 +359,16 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   
   const loginProxy = ref(ylxMustLogIn.loginProxyObject)
-  const instanceMyOrderHandler = ylxMustLogIn.interceptMastLogIn({onLoggedIn: myOrder})
+  const instanceMyOrderHandler = ylxMustLogIn.intercept({success: myOrder})
   const hasLogin = computed(()=>loginProxy.value.login)
   
   function setToggle() {
     ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
   }
   function interceptToPage(fn,...args) {
-    ylxMustLogIn.interceptMastLogIn({
-      onLoggedIn: ()=>fn(...args),
-      // confirm:  ()=>ylxNavigateTo('/pages/login/login')
+    ylxMustLogIn.intercept({
+      success: ()=>fn(...args),
+      // fail:  ()=>ylxNavigateTo('/pages/login/login')
     })()
   }
   --------------------------------------------------------
@@ -397,7 +397,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
         console.log('登录后才打印。。。。。。')
     },
     instanceMyOrderHandler() {
-        ylxMustLogIn.interceptMastLogIn({onLoggedIn: this.myOrder})()
+        ylxMustLogIn.intercept({success: this.myOrder})()
     },
     setToggle() {
         ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
