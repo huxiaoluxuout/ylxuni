@@ -1,5 +1,4 @@
-import {createProxyObject} from "./createProxyObject.js";
-import {dataTypeJudge} from "./dataTypeJudge.js";
+import {createProxyObject} from "./tools.js";
 
 /**
  * 创建一个代理对象的拦截器工具
@@ -17,15 +16,6 @@ export function useInterceptorProxy(targetObject) {
      * @returns {Function} - 包装后的拦截器函数
      */
     const createInterceptor = function ({onError, onSuccess}) {
-
-        if (dataTypeJudge(onSuccess, 'onSuccess')) {
-            console.error(`${targetObject}: 函数`);
-            return;
-        }
-        if (dataTypeJudge(onError, 'function')) {
-            console.error(`${targetObject}: 函数`);
-            return;
-        }
 
         return function (...args) {
             const firstProperty = Object.keys(targetObject)[0];

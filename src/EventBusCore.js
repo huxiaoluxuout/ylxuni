@@ -5,26 +5,12 @@ export class EventBusCore {
         this.eventListeners = new Map();
     }
 
-    _validateEventName(eventName) {
-        if (typeof eventName !== 'string') {
-            throw new Error(`事件名称必须是一个字符串，当前类型: ${typeof eventName}`);
-        }
-    }
-
-    _validateListenerFunction(listenerFunction) {
-        if (!dataTypeJudge(listenerFunction, 'function')) {
-            throw new Error(`listenerFunction 必须是一个函数, 当前类型: ${typeof listenerFunction}`);
-        }
-    }
-
     /**
      * 为指定事件添加监听器
      * @param {string} eventName - 事件名称
      * @param {Function} listenerFunction - 监听器函数
      */
     on(eventName, listenerFunction) {
-        this._validateEventName(eventName);
-        this._validateListenerFunction(listenerFunction);
 
         if (!this.eventListeners.has(eventName)) {
             this.eventListeners.set(eventName, {});
@@ -40,8 +26,6 @@ export class EventBusCore {
      * @param {Function} listenerFunction - 监听器函数
      */
     once(eventName, listenerFunction) {
-        this._validateEventName(eventName);
-        this._validateListenerFunction(listenerFunction);
 
         const onceWrapper = (...args) => {
             listenerFunction(...args);
@@ -70,10 +54,8 @@ export class EventBusCore {
             handlerName = options.handler;
             eventSource = options.source;
         } else {
-            throw new Error('Options 必须是字符串或对象');
+            throw new Error('第一个参数必须是字符串或对象');
         }
-
-        this._validateEventName(eventName);
 
         const listeners = this.eventListeners.get(eventName);
         if (!listeners) {
@@ -101,7 +83,6 @@ export class EventBusCore {
      * @param {boolean} [del=false] - eventName中的所有监听器函数
      */
     off(eventName, listenerFunction, del) {
-        this._validateEventName(eventName);
 
         if (!listenerFunction) {
             this.eventListeners.delete(eventName);
@@ -117,10 +98,8 @@ export class EventBusCore {
 
                 }
             } else {
-                console.warn(`无法移除监听器，事件: ${eventName} 不存在`);
+
             }
-        } else {
-            throw new Error(`listenerFunction 必须是一个函数, 当前类型: ${typeof listenerFunction}`);
         }
     }
 

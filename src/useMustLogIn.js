@@ -1,7 +1,6 @@
-import {createProxyObject} from "./utils/createProxyObject.js";
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-
+import {createProxyObject} from "./utils/tools.js";
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
@@ -15,28 +14,6 @@ export class MustLogIn {
         }
 
         this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
-    }
-
-    static agreeToLogIn() {
-        MustLogIn.platform.navigateTo({
-            url: '/pages/login/login',
-            fail(fail) {
-                console.error('platform:fail', fail)
-            },
-        })
-    }
-
-    static onError() {
-        MustLogIn.platform.showModal({
-            title: '登录后，获取完整功能',
-            success: function (res) {
-                if (res.confirm) {
-                    MustLogIn.agreeToLogIn()
-                } else if (res.cancel) {
-                    MustLogIn.notAgreeToLogIn()
-                }
-            }
-        })
     }
 
     setLoginToken({tokenKey, tokenData}, callback) {
@@ -71,29 +48,23 @@ export class MustLogIn {
     /**
      * 处理用户登录拦截逻辑并返回一个拦截器。
      * @param {Object} options - 登录拦截选项。
-     * @param {Function} options.onLoggedIn - 用户已登录时的回调函数，必传。
-     * @param {Object} [options.onNotLoggedIn=MustLogIn.onError] - 用户未登录时的选项，默认为 MustLogIn.onError。
-     * @param {Function} [options.cancel] - 用户不同意登录时的回调函数，可选，仅当 unLoggedIn 为 MustLogIn.onError 时可用。
-     * @param {Function} [options.confirm] - 用户同意登录时的回调函数，可选，仅当 unLoggedIn 为 MustLogIn.onError 时可用。
+     * @param {Function} options.success - 用户已登录时的回调函数，必传。
+     * @param {Object} [options.fail=MustLogIn.onError] - 用户未登录时的选项，默认为 MustLogIn.onError。
      * @returns {(function(...[*]): void)|*} 返回创建的拦截器对象。
      */
 
-    interceptMastLogIn({
-                           onLoggedIn = () => {
+    intercept({
+                           success = () => {
                            },
-                           onNotLoggedIn = MustLogIn.onError,
-                           cancel = () => {
+                           fail = () => {
                            },
-                           confirm = MustLogIn.agreeToLogIn
+
                        }) {
         const {createInterceptor} = useInterceptorProxy(MustLogIn.loginObject)
-        // 同意登录
-        MustLogIn.agreeToLogIn = confirm
-        // 不同意登录
-        MustLogIn.notAgreeToLogIn = cancel
+
         return createInterceptor({
-            onSuccess: onLoggedIn,
-            onError: onNotLoggedIn
+            onSuccess: success,
+            onError: fail
         })
     }
 }

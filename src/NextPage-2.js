@@ -1,6 +1,7 @@
 import {useFunctionQueue} from "./utils/useFunctionQueue.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import {createProxyObject} from "./utils/createProxyObject.js";
+import {createProxyObject} from "./utils/tools.js";
+
 
 export class NextPage {
     static platform = null

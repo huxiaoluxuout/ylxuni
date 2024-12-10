@@ -1,5 +1,6 @@
 import {EventBusCore} from "./EventBusCore.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
+import {parseUrl} from "./utils/tools.js";
 
 const instanceEventBus = new EventBusCore()
 
@@ -33,7 +34,7 @@ export class UseEventBus {
 
     static handlerListener({args, source}) {
         let [{navigationType, targetPath, isNavigationEnabled, options, sourceName}] = args
-        const {path, query, delimiter} = UseEventBus.parseUrl(targetPath);
+        const {path, query, delimiter} = parseUrl(targetPath);
         UseEventBus.sendTargetPage(path, source, options, sourceName)
         UseEventBus.handleNavigation(navigationType, path, query, delimiter, options, isNavigationEnabled);
     }
@@ -133,14 +134,10 @@ export class UseEventBus {
      * @param {Function} callback 回调函数
      */
     on(callback) {
-        let fn=callback
-        if (typeof callback !== 'function') return;
-        if(callback.name===''){
-            console.log('匿名函数 fn',fn.name)
-        }else {
-
-            console.log('普通函数',callback.name)
+        if (typeof callback !== 'function') {
+            return
         }
+
         UseEventBus.getRoute().then(currentRoute => {
             if (!UseEventBus.eventBusSet.has(currentRoute)) {
                 UseEventBus.eventBusSet.add(currentRoute)
@@ -178,20 +175,7 @@ export class UseEventBus {
         instanceEventBus.clear()
     }
 
-    /**
-     * 解析 URL 路径
-     * @param {string} pathUrl 路径 URL
-     * @return {Object} 解析后的对象，包含路径、查询参数和分隔符
-     */
-    static parseUrl(pathUrl) {
-        const url = pathUrl.startsWith('/') ? pathUrl : '/' + pathUrl;
-        const [path, query] = url.split('?');
-        return {
-            path,
-            query: query ? '?' + query : '',
-            delimiter: query ? '&' : '?',
-        };
-    }
+
 }
 
 

@@ -1,3 +1,18 @@
+/**
+ * 解析 URL 路径
+ * @param {string} pathUrl 路径 URL
+ * @return {Object} 解析后的对象，包含路径、查询参数和分隔符
+ */
+export function parseUrl(pathUrl) {
+    const url = pathUrl.startsWith('/') ? pathUrl : '/' + pathUrl;
+    const [path, query] = url.split('?');
+    return {
+        path,
+        query: query ? '?' + query : '',
+        delimiter: query ? '&' : '?',
+    };
+}
+
 
 /**
  * 创建一个代理对象，用于拦截属性的访问和设置操作
@@ -6,10 +21,6 @@
  */
 
 export function createProxyObject(targetObject,) {
-    // 检查参数是否为对象
-    if (typeof targetObject !== 'object' || targetObject === null) {
-        throw new TypeError('Target must be an object');
-    }
 
     // 定义 Proxy 处理器
     const proxyHandler = {
