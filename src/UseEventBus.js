@@ -21,7 +21,8 @@ export class UseEventBus {
 
 
     // 构造函数，初始化默认的全局回调函数
-    static defaultGlobalCallback = ({args, source}) => console.log('AppEvent', {args, source});
+    // {args, source}
+    static defaultGlobalCallback = () => ({});
 
     /**
      * 注册全局事件监听器
@@ -78,20 +79,26 @@ export class UseEventBus {
 
     /**
      * 发送页面事件，并根据需要进行导航
-     * @param {Object} config 配置对象
-     * @param {string} config.targetPath 目标路径
-     * @param {Object} [config.options={}] 传递的数据
+     * @param {object} config 配置对象
+     * @param {string} [config.targetPath] 目标路径
+     * @param {object} [config.options={}] 传递的数据
      * @param {string} [config.source=''] 自定义来源名称
+     * @param {boolean} [config.prevPage=false] 开启上一页
      * @param {boolean} [isNavigationEnabled=false] 是否启用导航
      * @param {string} [navigationType=navigateTo] 导航类型
      */
-    async emit({targetPath, options = {}, source = ''},
+    //
+    async emit({targetPath, options = {}, source = '', prevPage = false},
                isNavigationEnabled = false,
                navigationType = UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO) {
 
-        const currentRoute = await UseEventBus.getRoute();
+        const {currentRoute, prevPageRoute} = await UseEventBus.getRoute();
+        if (prevPage && prevPageRoute) {
+            targetPath = prevPageRoute
+        }
 
-        const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
+
+        const mergedOptions = dataTypeJudge(options, 'object') ? Object.assign({fromPage: currentRoute}, options) : options;
 
         return new Promise(resolve => {
             mergedOptions.thenCallback = resolve
@@ -112,7 +119,7 @@ export class UseEventBus {
      */
     async emitGlobal(options = {}, source = '') {
         const currentRoute = await UseEventBus.getRoute();
-        const mergedOptions = typeof options === 'object' ? Object.assign({fromPage: currentRoute}, options) : options;
+        const mergedOptions = dataTypeJudge(options, 'object') ? Object.assign({fromPage: currentRoute}, options) : options;
         return new Promise(resolve => {
             mergedOptions.thenCallback = resolve
             instanceEventBus.emit({event: 'AppEvent', source: source || currentRoute}, mergedOptions);
@@ -121,12 +128,18 @@ export class UseEventBus {
 
     /**
      * 获取当前页面路径
-     * @return {Promise<string>} 返回当前页面路径的 Promise 对象
+     * @return {Promise<object>} 返回当前页面路径的 Promise 对象
      */
     static getRoute() {
         const pages = getCurrentPages();
+        let prevPageRoute = null;
+        if (pages.length >= 2) {
+            prevPageRoute = '/' + pages[pages.length - 2]['route'];
+        }
+
         const currentRoute = '/' + pages[pages.length - 1]['route'];
-        return Promise.resolve(currentRoute);
+
+        return Promise.resolve({currentRoute, prevPageRoute});
     }
 
     /**
@@ -134,11 +147,12 @@ export class UseEventBus {
      * @param {Function} callback 回调函数
      */
     on(callback) {
-        if (typeof callback !== 'function') {
+        if (!dataTypeJudge(callback, 'function')) {
             return
         }
 
-        UseEventBus.getRoute().then(currentRoute => {
+
+        UseEventBus.getRoute().then(({currentRoute}) => {
             if (!UseEventBus.eventBusSet.has(currentRoute)) {
                 UseEventBus.eventBusSet.add(currentRoute)
             }
@@ -160,7 +174,7 @@ export class UseEventBus {
      */
     off(listenerFunction, {targetPath, del = false}) {
         if (dataTypeJudge(targetPath, 'undefined')) {
-            UseEventBus.getRoute().then(currentRoute => {
+            UseEventBus.getRoute().then(({currentRoute}) => {
                 instanceEventBus.off(currentRoute, listenerFunction, del)
             })
         } else {

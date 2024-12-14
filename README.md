@@ -15,24 +15,24 @@
 
 ```
 import {reactive} from 'vue'
-import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
-const ylxInstance = ylxIntercept(uni,reactive)
+import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
+const ylxInstance = ylxuni(uni,reactive)
 export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
 
 ```
 
 ### vue2 - `useylxuni.js`
 ```
-import ylxIntercept from "@/ylxuniCore/ylxuni.esm.js"
-const ylxInstance = ylxIntercept(uni)
+import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
+const ylxInstance = ylxuni(uni)
 
 export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
 ```
 
 ### 微信原生小程序 -  `useylxuni.js`
 ```
-const ylxIntercept =require("./ylxuni_wx.cjs")
-const ylxInstance = ylxIntercept(wx)
+const ylxuni =require("./ylxuni_wx.cjs")
+const ylxInstance = ylxuni(wx)
 
 export const { ylxEventBus, ylxMustLogIn,ylxNextPage} = ylxInstance
 
