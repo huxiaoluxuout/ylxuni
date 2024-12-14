@@ -98,6 +98,7 @@ export const { ylxEventBus, ylxMustLogIn,ylxNextPage} = ylxInstance
 function myOrder() {
    ylxEventBus.emit({
      targetPath: '/pagesSubMine/myOrder/myOrder',
+     //prevPage:true,//上一页
      options:{
        age:10,
        color:'red',
@@ -118,6 +119,7 @@ function myOrder() {
 function eventBusMine() {
   ylxEventBus.emit({
   targetPath: '/pages/mine/mine',
+  //prevPage:true,//上一页
   options: {age: 18}
   }, true, 'switchTab')
 }
