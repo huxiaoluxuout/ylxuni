@@ -1,9 +1,9 @@
 import {NextPage} from "./src/NextPage.js";
 
 
-function initNextPage(platform=uni) {
+function initNextPage(platform=uni,vue3Reactive) {
     return {
-        ylxNextPage: new NextPage(platform)
+        ylxNextPage: new NextPage(platform,vue3Reactive)
     };
 }
 

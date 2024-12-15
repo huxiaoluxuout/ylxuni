@@ -206,6 +206,10 @@ export default {
   
   const {ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
 
+  /*--------------------------loading---------------------------------*/
+  const loadingProxy = ref(ylxNextPage.loadingProxyObject)
+  const hasLoading = computed(() => loadingProxy.value.loading)
+  /*--------------------------loading---------------------------------*/
   
   const incomeList = ref([])
    getNoticeListApi() {

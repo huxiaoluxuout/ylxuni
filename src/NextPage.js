@@ -7,8 +7,23 @@ export class NextPage {
     static platform = null
     static pageInfo = {page: 1, pageSize: 10}
 
-    constructor(platform) {
+    loadingProxyObject = null
+    static loadingObj = {loading: true}
+
+
+    constructor(platform, reactive) {
         NextPage.platform = platform
+        // vue3 将数据变成响应式
+        if (reactive) {
+            NextPage.loadingObj = reactive(NextPage.loadingObj)
+        }
+        this.loadingProxyObject = createProxyObject(NextPage.loadingObj)
+
+
+    }
+
+    setLoadingProxyObject(b) {
+        this.loadingProxyObject.loading = b
     }
 
     /**
@@ -17,25 +32,28 @@ export class NextPage {
      * @param {number} pageInfo.page  -当前页码
      * @param {number}  pageInfo.pageSize- 分页大小
      * @returns {{
-     *   dataHandler: ((function({data?: [], resData?: []}, boolean=): (*[]))|*),
-     *   reload: function(): void,
-     *   handleScrollAndRefresh: {
+     *   ylxSetData: ((function({data?: [], resData?: []}, boolean): (*[]))|*),
+     *   ylxRefresh: function(): void,
+     *   ylxMixins: {
      *     onReachBottom(): void,
      *     onLoad(): void,
      *     onPullDownRefresh(): void,
      *   },
-     *   invokeAllFunctions: function(): void,
-     *   pageInfoProxy: Object,
-     *   reachBottomHandler: function(): void,
-     *   addFunction: function(fn: Function): void,
-     *   setFunction: function(fn: Function): void
+     *   ylxAddFun: function(): void,
+     *   ylxSetFun: function(fn: Function): void,
+     *   ylxInvokeFn: function(fn: Function): void
+     *   ylxPageInfo: Object,
+     *   ylxReachBottom: function(): void,
+     *
      * }}
      */
     useNextPage(pageInfo = {page: 1, pageSize: 10}) {
+        const that = this
         const {setFun, addFun, invokeAllFn} = useFunctionQueue()
         const ylxAddFun = addFun
         const ylxSetFun = setFun
         const ylxInvokeFn = invokeAllFn
+
 
         if (!dataTypeJudge(pageInfo, 'object')) {
             pageInfo = {page: 1, pageSize: 10}
@@ -51,19 +69,21 @@ export class NextPage {
         NextPage.pageInfo = {...pageInfo}
 
         const pageInfoProxy = createProxyObject(pageInfo)
-        const loadingInfoProxy = createProxyObject({loading:true})
+
 
         // 重置page
         function resetPageInfo() {
             pageInfoProxy.page = NextPage.pageInfo.page
             pageInfoProxy.pageSize = NextPage.pageInfo.pageSize
-            loadingInfoProxy.loading = true
+
         }
+
 
         // 重新加载
         function reload(callback) {
             isByReload = true
             hasLastPage = false
+            that.setLoadingProxyObject(true)
             resetPageInfo()
             ylxInvokeFn();
             if (dataTypeJudge(callback, 'function')) {
@@ -81,7 +101,7 @@ export class NextPage {
         let timeId = 0
 
         // 下拉刷新
-        function pullDownRefres() {
+        function pullDownRefresh() {
             reload()
             timeId = setTimeout(() => {
                 NextPage.platform.stopPullDownRefresh();
@@ -91,8 +111,8 @@ export class NextPage {
 
         function resDataHandler({data = [], resData = []}, isNextPage = false) {
             NextPage.platform.stopPullDownRefresh();
-            clearTimeout(timeId)
-            loadingInfoProxy.loading = false
+            clearTimeout(timeId);
+            that.setLoadingProxyObject(false)
 
             if (!dataTypeJudge(data, 'array')) {
                 return resData
@@ -142,7 +162,7 @@ export class NextPage {
                 reachBottomHandler()
             },
             onPullDownRefresh() {
-                pullDownRefres()
+                pullDownRefresh()
             },
         }
 
@@ -150,7 +170,6 @@ export class NextPage {
         return {
             ylxMixins: ylxMixins,
             ylxPageInfo: pageInfoProxy,
-            ylxLoadingInfo: loadingInfoProxy,
             ylxReachBottom: reachBottomHandler,
             ylxSetFun: ylxSetFun,
             ylxAddFun: ylxAddFun,
