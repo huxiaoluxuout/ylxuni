@@ -116,7 +116,7 @@ export class UseEventBus {
      * @param {String} [source=''] 自定义来源名称
      */
     async emitGlobal(options = {}, source = '') {
-        const currentRoute = await UseEventBus.getRoute();
+        const {currentRoute} = await UseEventBus.getRoute();
         const mergedOptions = dataTypeJudge(options, 'object') ? Object.assign({fromPage: currentRoute}, options) : options;
         return new Promise(resolve => {
             mergedOptions.thenCallback = resolve
