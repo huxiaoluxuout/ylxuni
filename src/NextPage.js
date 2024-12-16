@@ -6,9 +6,9 @@ import {createProxyObject} from "./utils/tools.js";
 export class NextPage {
     static platform = null
     static pageInfo = {page: 1, pageSize: 10}
+    static loadingObj = {loading: true}
 
     loadingProxyObject = null
-    static loadingObj = {loading: true}
 
 
     constructor(platform, reactive) {

@@ -64,11 +64,10 @@ export class UseEventBus {
     static handleNavigation(navigationType, path, query, delimiter, options, isNavigationEnabled) {
         if (!isNavigationEnabled) return;
         if (navigationType !== UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO && navigationType !== UseEventBus.NAVIGATION_TYPES.SWITCH_TAB) {
-            console.error(`导航路径：${JSON.stringify(UseEventBus.NAVIGATION_TYPES)}`);
             return;
         }
 
-        const fullPath = navigationType === UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO ? `${path}${query}${delimiter}currentRoute=${path}` : path;
+        const fullPath = navigationType === UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO ? `${path}${query}` : path;
 
         UseEventBus.platform[navigationType]({
             url: fullPath,
@@ -87,7 +86,6 @@ export class UseEventBus {
      * @param {boolean} [isNavigationEnabled=false] 是否启用导航
      * @param {string} [navigationType=navigateTo] 导航类型
      */
-    //
     async emit({targetPath, options = {}, source = '', prevPage = false},
                isNavigationEnabled = false,
                navigationType = UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO) {

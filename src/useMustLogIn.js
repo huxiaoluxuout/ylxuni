@@ -48,18 +48,12 @@ export class MustLogIn {
     /**
      * 处理用户登录拦截逻辑并返回一个拦截器。
      * @param {Object} options - 登录拦截选项。
-     * @param {Function} options.success - 用户已登录时的回调函数，必传。
-     * @param {Object} [options.fail=MustLogIn.onError] - 用户未登录时的选项，默认为 MustLogIn.onError。
+     * @param {function} options.success - 用户已登录时的回调函数，必传。
+     * @param {function} options.fail - 用户未登录时的选项
      * @returns {(function(...[*]): void)|*} 返回创建的拦截器对象。
      */
 
-    intercept({
-                           success = () => {
-                           },
-                           fail = () => {
-                           },
-
-                       }) {
+    intercept({success = () => {}, fail = () => {}}) {
         const {createInterceptor} = useInterceptorProxy(MustLogIn.loginObject)
 
         return createInterceptor({
