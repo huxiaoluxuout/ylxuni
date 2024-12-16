@@ -39,8 +39,8 @@ export class NextPage {
      *     onLoad(): void,
      *     onPullDownRefresh(): void,
      *   },
-     *   ylxAddFun: function(): void,
-     *   ylxSetFun: function(fn: Function): void,
+     *   ylxAddFn: function(): void,
+     *   ylxSetFn: function(fn: Function): void,
      *   ylxInvokeFn: function(fn: Function): void
      *   ylxPageInfo: Object,
      *   ylxReachBottom: function(): void,
@@ -120,7 +120,6 @@ export class NextPage {
 
             // 列表返回数据要为数组
             if (dataTypeJudge(data, 'array') && !dataTypeJudge(resData, 'array')) {
-                console.error(`${resData} must be array !!!`)
                 resData = []
             }
 
@@ -171,8 +170,8 @@ export class NextPage {
             ylxMixins: ylxMixins,
             ylxPageInfo: pageInfoProxy,
             ylxReachBottom: reachBottomHandler,
-            ylxSetFun: ylxSetFun,
-            ylxAddFun: ylxAddFun,
+            ylxSetFn: ylxSetFun,
+            ylxAddFn: ylxAddFun,
             ylxInvokeFn: ylxInvokeFn,
             ylxRefresh: reload,
             ylxSetData: resDataHandler

@@ -53,8 +53,6 @@ export class EventBusCore {
             eventName = options.event;
             handlerName = options.handler;
             eventSource = options.source;
-        } else {
-            throw new Error('第一个参数必须是字符串或对象');
         }
 
         const listeners = this.eventListeners.get(eventName);

@@ -71,7 +71,7 @@ export class UseEventBus {
 
         UseEventBus.platform[navigationType]({
             url: fullPath,
-            fail: err => console.error('Navigation Error:', err),
+            fail: err => console.error(err),
         });
 
     }

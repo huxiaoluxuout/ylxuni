@@ -162,7 +162,7 @@ onLoad: function () {
 ```
 import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
 
-const {ylxMixins,ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+const {ylxMixins,ylxPageInfo, ylxReachBottom, ylxSetFn, ylxAddFn, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
 
 
 export default {
@@ -174,7 +174,7 @@ export default {
   },
 
   onLoad() {
-    ylxSetFun(this.getNoticeListApi)
+    ylxSetFn(this.getNoticeListApi)
     ylxInvokeFn()
 
   },
@@ -204,7 +204,7 @@ export default {
   import {onLoad, onReachBottom, onPullDownRefresh} from '@dcloudio/uni-app'
   import {ylxNextPage} from "@/ylxuniCore/useylxuni.js";
   
-  const {ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+  const {ylxPageInfo, ylxReachBottom, ylxSetFn, ylxAddFn, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
 
   /*--------------------------loading---------------------------------*/
   const loadingProxy = ref(ylxNextPage.loadingProxyObject)
@@ -226,7 +226,7 @@ export default {
   }
   onLoad(() => {
     /*------------------------------------------*/
-    ylxSetFun(getNoticeListApi)
+    ylxSetFn(getNoticeListApi)
     // 在合适的时机调用
     ylxInvokeFn()
   })
@@ -250,16 +250,16 @@ Page({
         couponList: [],
     },
     onLoad(options) {
-        const {ylxPageInfo, ylxReachBottom, ylxSetFun, ylxAddFun, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
+        const {ylxPageInfo, ylxReachBottom, ylxSetFn, ylxAddFn, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
         this.ylxPageInfo = ylxPageInfo;
         this.ylxReachBottom = ylxReachBottom;
-        this.ylxSetFun = ylxSetFun;
-        this.ylxAddFun = ylxAddFun;
+        this.ylxSetFn = ylxSetFn;
+        this.ylxAddFn = ylxAddFn;
         this.ylxInvokeFn = ylxInvokeFn;
         this.ylxRefresh = ylxRefresh;
         this.ylxSetData = ylxSetData;
         /*------------------------------------------*/
-        this.ylxSetFun(this.getList)
+        this.ylxSetFn(this.getList)
         // 在合适的时机调用
         this.ylxInvokeFn()
         
