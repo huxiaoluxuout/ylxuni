@@ -12,4 +12,4 @@ unpackage
 config.js
 !/network/config.js
 env.js
-/dist
+
