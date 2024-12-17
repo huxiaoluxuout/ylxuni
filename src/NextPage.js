@@ -8,7 +8,7 @@ export class NextPage {
     static pageInfo = {page: 1, pageSize: 10}
     static loadingObj = {loading: true}
 
-    loadingProxyObject = null
+    // loadingProxyObject = null
 
 
     constructor(platform, reactive) {
@@ -22,9 +22,9 @@ export class NextPage {
 
     }
 
-    setLoadingProxyObject(b) {
-        this.loadingProxyObject.loading = b
-    }
+    // setLoadingProxyObject(b) {
+    //     this.loadingProxyObject.loading = b
+    // }
 
     /**
      * 创建具有刷新和无限滚动功能的分页处理程序
@@ -49,9 +49,9 @@ export class NextPage {
      */
     useNextPage(pageInfo = {page: 1, pageSize: 10}) {
         const that = this
-        const {setFun, addFun, invokeAllFn} = useFunctionQueue()
-        const ylxAddFun = addFun
-        const ylxSetFun = setFun
+        const {setFn, addFn, invokeAllFn} = useFunctionQueue()
+        const ylxAddFn = addFn
+        const ylxSetFn = setFn
         const ylxInvokeFn = invokeAllFn
 
 
@@ -83,7 +83,9 @@ export class NextPage {
         function reload(callback) {
             isByReload = true
             hasLastPage = false
-            that.setLoadingProxyObject(true)
+            // that.setLoadingProxyObject(true)
+            that.loadingProxyObject.loading = true
+
             resetPageInfo()
             ylxInvokeFn();
             if (dataTypeJudge(callback, 'function')) {
@@ -112,7 +114,9 @@ export class NextPage {
         function resDataHandler({data = [], resData = []}, isNextPage = false) {
             NextPage.platform.stopPullDownRefresh();
             clearTimeout(timeId);
-            that.setLoadingProxyObject(false)
+            // that.setLoadingProxyObject(false)
+            that.loadingProxyObject.loading = false
+
 
             if (!dataTypeJudge(data, 'array')) {
                 return resData
@@ -170,8 +174,8 @@ export class NextPage {
             ylxMixins: ylxMixins,
             ylxPageInfo: pageInfoProxy,
             ylxReachBottom: reachBottomHandler,
-            ylxSetFn: ylxSetFun,
-            ylxAddFn: ylxAddFun,
+            ylxSetFn: ylxSetFn,
+            ylxAddFn: ylxAddFn,
             ylxInvokeFn: ylxInvokeFn,
             ylxRefresh: reload,
             ylxSetData: resDataHandler

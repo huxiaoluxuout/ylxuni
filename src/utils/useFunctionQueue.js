@@ -39,8 +39,8 @@ export function useFunctionQueue() {
     };
 
     return {
-        addFun: addUniqueFunction,
-        setFun: replaceMainFunction,
+        addFn: addUniqueFunction,
+        setFn: replaceMainFunction,
         invokeAllFn: invokeAllFunctions,
     };
 }
