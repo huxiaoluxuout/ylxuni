@@ -1,9 +1,13 @@
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import {createProxyObject} from "./utils/tools.js";
+import {createProxyObject, setWxData} from "./utils/tools.js";
+
 export class MustLogIn {
     static platform = null
     static loginObject = {login: false}
+
+    static wxThis = null
+    static wxLoginKey = 'login'
 
     constructor(platform, reactive) {
         MustLogIn.platform = platform
@@ -16,8 +20,19 @@ export class MustLogIn {
         this.loginProxyObject = createProxyObject(MustLogIn.loginObject)
     }
 
+    /**
+     * @param {object} wxThis - 原生微信的this
+     * @param {string} loginKey - loginKey
+     */
+    wxSetLogin(wxThis, loginKey = 'login') {
+        MustLogIn.wxThis = wxThis
+        MustLogIn.wxLoginKey = loginKey
+    }
+
     setLoginToken({tokenKey, tokenData}, callback) {
         this.loginProxyObject.login = true
+        setWxData(MustLogIn.wxThis,MustLogIn.wxLoginKey,true)
+
         MustLogIn.platform.setStorage({
             key: tokenKey,
             data: tokenData,
@@ -35,6 +50,8 @@ export class MustLogIn {
      */
     unSetLoginToken(callback, tokenKey = 'token') {
         this.loginProxyObject.login = false
+        setWxData(MustLogIn.wxThis,MustLogIn.wxLoginKey,false)
+
         MustLogIn.platform.removeStorage({
             key: tokenKey,
             success: function () {
@@ -53,7 +70,11 @@ export class MustLogIn {
      * @returns {(function(...[*]): void)|*} 返回创建的拦截器对象。
      */
 
-    intercept({success = () => {}, fail = () => {}}) {
+    intercept({
+                  success = () => {
+                  }, fail = () => {
+        }
+              }) {
         const {createInterceptor} = useInterceptorProxy(MustLogIn.loginObject)
 
         return createInterceptor({
@@ -62,5 +83,4 @@ export class MustLogIn {
         })
     }
 }
-
 

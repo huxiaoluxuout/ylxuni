@@ -1,3 +1,5 @@
+import {dataTypeJudge} from "./dataTypeJudge.js";
+
 /**
  * 解析 URL 路径
  * @param {string} pathUrl 路径 URL
@@ -35,4 +37,20 @@ export function createProxyObject(targetObject,) {
     };
 
     return new Proxy(targetObject, proxyHandler);
+}
+
+/**
+ * 设置原生微信小程序
+ * @param {object} wxThis
+ * @param {string} dataKey
+ * @param status
+ */
+export function setWxData(wxThis, dataKey, status) {
+    if (dataTypeJudge(wxThis, 'object')) {
+        if (dataTypeJudge(wxThis.setData, 'function')) {
+            wxThis.setData({
+                [dataKey]: status
+            })
+        }
+    }
 }

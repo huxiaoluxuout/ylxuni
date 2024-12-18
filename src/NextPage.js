@@ -1,15 +1,12 @@
 import {useFunctionQueue} from "./utils/useFunctionQueue.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import {createProxyObject} from "./utils/tools.js";
+import {createProxyObject, setWxData} from "./utils/tools.js";
 
 
 export class NextPage {
     static platform = null
     static pageInfo = {page: 1, pageSize: 10}
     static loadingObj = {loading: true}
-
-    // loadingProxyObject = null
-
 
     constructor(platform, reactive) {
         NextPage.platform = platform
@@ -19,18 +16,15 @@ export class NextPage {
         }
         this.loadingProxyObject = createProxyObject(NextPage.loadingObj)
 
-
     }
-
-    // setLoadingProxyObject(b) {
-    //     this.loadingProxyObject.loading = b
-    // }
 
     /**
      * 创建具有刷新和无限滚动功能的分页处理程序
      * @param {object} pageInfo
      * @param {number} pageInfo.page  -当前页码
      * @param {number}  pageInfo.pageSize- 分页大小
+     * @param {object} [wxThis] - 原生微信的this
+     * @param {string} [loadingKey = loading] - loadingKey
      * @returns {{
      *   ylxSetData: ((function({data?: [], resData?: []}, boolean): (*[]))|*),
      *   ylxRefresh: function(): void,
@@ -47,13 +41,12 @@ export class NextPage {
      *
      * }}
      */
-    useNextPage(pageInfo = {page: 1, pageSize: 10}) {
+    useNextPage(pageInfo = {page: 1, pageSize: 10}, wxThis, loadingKey = 'loading') {
         const that = this
         const {setFn, addFn, invokeAllFn} = useFunctionQueue()
         const ylxAddFn = addFn
         const ylxSetFn = setFn
         const ylxInvokeFn = invokeAllFn
-
 
         if (!dataTypeJudge(pageInfo, 'object')) {
             pageInfo = {page: 1, pageSize: 10}
@@ -83,8 +76,8 @@ export class NextPage {
         function reload(callback) {
             isByReload = true
             hasLastPage = false
-            // that.setLoadingProxyObject(true)
             that.loadingProxyObject.loading = true
+            setWxData(wxThis, loadingKey, true)
 
             resetPageInfo()
             ylxInvokeFn();
@@ -110,13 +103,18 @@ export class NextPage {
             }, 2500)
         }
 
-
+        /**
+         * 后端接口返回数据处理
+         * @param {object} options
+         * @param {array||object} options.data=[]
+         * @param {array||object} options.resData=[]
+         * @param {boolean} [isNextPage=false]
+         * */
         function resDataHandler({data = [], resData = []}, isNextPage = false) {
             NextPage.platform.stopPullDownRefresh();
             clearTimeout(timeId);
-            // that.setLoadingProxyObject(false)
             that.loadingProxyObject.loading = false
-
+            setWxData(wxThis, loadingKey, false)
 
             if (!dataTypeJudge(data, 'array')) {
                 return resData
