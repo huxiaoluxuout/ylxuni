@@ -186,10 +186,7 @@ export default {
         page_size: ylxPageInfo.pageSize
       }).then(res => {
         let resData = res.data
-        let len1 = this.incomeList.length
-        let len2 = resData.data.length
-        let hasNextPage = resData.total > (len1 + len2)
-        this.incomeList = ylxSetData({data: this.incomeList, resData: resData.data}, hasNextPage)
+        this.incomeList = ylxSetData({data: this.incomeList, resData: resData.data}, resData.total)
 
       })
     }
@@ -218,10 +215,7 @@ export default {
           page_size: ylxPageInfo.pageSize
         }).then(res => {
           let resData = res.data
-          let len1 = incomeList.value.length
-          let len2 = resData.data.length
-          let hasNextPage = resData.total > (len1 + len2)
-          incomeList.value = ylxSetData({data: incomeList.value, resData: resData.list}, hasNextPage)
+          incomeList.value = ylxSetData({data: incomeList.value, resData: resData.list},  resData.total)
         })
   }
   onLoad(() => {
@@ -271,15 +265,10 @@ Page({
             page: this.ylxPageInfo.page,
             page_size: this.ylxPageInfo.pageSize
         }).then((res) => {
-            
             let resData = res.data
-            let len1 = this.data.couponList.length
-            let len2 = resData.data.length
-            // 判断是否还有下一页数据
-            // let hasNextPage = resData.total > (len1 + len2)
-            let hasNextPage = false
+       
             this.setData({
-                couponList:  this.ylxSetData({data: this.data.couponList, resData: resData.data}, hasNextPage)
+                couponList:  this.ylxSetData({data: this.data.couponList, resData: resData.data},  resData.total)
             })
             
         });

@@ -57,7 +57,9 @@ export class NextPage {
 
         let isByReload = false
 
-        let hasLastPage = false
+        let isLastPage = false
+        let loadMore = true
+        let a = []
 
         NextPage.pageInfo = {...pageInfo}
 
@@ -68,14 +70,16 @@ export class NextPage {
         function resetPageInfo() {
             pageInfoProxy.page = NextPage.pageInfo.page
             pageInfoProxy.pageSize = NextPage.pageInfo.pageSize
-
         }
 
-
-        // 重新加载
+        /**
+         * 重新加载
+         * @param {function} [callback]
+         */
         function reload(callback) {
             isByReload = true
-            hasLastPage = false
+            isLastPage = false
+            loadMore = true
             that.loadingProxyObject.loading = true
             setWxData(wxThis, loadingKey, true)
 
@@ -88,7 +92,7 @@ export class NextPage {
 
         // 触底加载下一页数据
         function reachBottomHandler() {
-            if (pageInfoProxy.page > 1 && !hasLastPage) {
+            if (pageInfoProxy.page > 1 && loadMore) {
                 ylxInvokeFn();
             }
         }
@@ -104,13 +108,13 @@ export class NextPage {
         }
 
         /**
-         * 后端接口返回数据处理
-         * @param {object} options
-         * @param {array||object} options.data=[]
-         * @param {array||object} options.resData=[]
-         * @param {boolean} [isNextPage=false]
-         * */
-        function resDataHandler({data = [], resData = []}, isNextPage = false) {
+         * 处理数据的函数
+         * @param {Object} params - 包含数据的对象
+         * @param {Array|Object} [params.data=[]] - 数据数组，可以是数组或对象,默认为空数组
+         * @param {(Array|Object)} [params.resData=[]] - 响应数据，可以是数组或对象，默认为空数组
+         * @param {number} total - 总条数
+         */
+        function resDataHandler({data = [], resData = []} = {}, total = 0) {
             NextPage.platform.stopPullDownRefresh();
             clearTimeout(timeId);
             that.loadingProxyObject.loading = false
@@ -127,32 +131,49 @@ export class NextPage {
 
             // 修复重新加载时，之前的数据没有清除的bug
             if (isByReload) {
-                data = []
+                data.length = 0
                 isByReload = false
             }
 
+            let len1 = data.length
+            let len2 = resData.length
+            let isNextPage = total > (len1 + len2)
+
+
             // 只有1页数据
             if (pageInfoProxy.page === 1) {
+                if (isNextPage) {
+                    pageInfoProxy.page += 1;
+                }
+
                 return resData
-            }
-
-            if (isNextPage) {
-                pageInfoProxy.page += 1;
-                return data.concat(resData);
-
             } else {
-                // 第1次加载最后的一页
-                if (!hasLastPage) {
-                    hasLastPage = true
+
+                if (isNextPage) {
+                    pageInfoProxy.page += 1;
                     return data.concat(resData);
+
                 } else {
-                    // 第2次加载最后的一页
-                    let eleLen = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
-                    let len = resData.length
-                    // TODO 待验证
-                    return data.splice(eleLen, len, ...resData)
+                    // 第1次加载最后的一页
+                    if (!isLastPage) {
+                        console.log('第1次加载最后的一页')
+                        isLastPage = true
+                        return data.concat(resData);
+                    } else {
+                        // 第2次加载最后的一页
+                        console.log('第2次加载最后的一页')
+                        loadMore = false
+                        let startIndex = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
+                        let dataLen = data.length
+                        let delNum = dataLen - startIndex
+                        console.log({startIndex, dataLen, delNum})
+                        data.splice(startIndex, delNum, ...resData)
+                        return data
+                    }
                 }
             }
+
+
         }
 
         const ylxMixins = {
