@@ -12,11 +12,6 @@ export class UseEventBus {
         UseEventBus.platform = platform
     }
 
-    // 定义导航类型常量
-    static NAVIGATION_TYPES = {
-        NAVIGATE_TO: 'navigateTo',
-        SWITCH_TAB: 'switchTab'
-    };
     static eventBusSet = new Set()
 
 
@@ -34,10 +29,9 @@ export class UseEventBus {
     }
 
     static handlerListener({args, source}) {
-        let [{navigationType, targetPath, isNavigationEnabled, options, sourceName}] = args
-        const {path, query, delimiter} = parseUrl(targetPath);
+        let [{targetPath, options, sourceName}] = args
+        const {path} = parseUrl(targetPath);
         UseEventBus.sendTargetPage(path, source, options, sourceName)
-        UseEventBus.handleNavigation(navigationType, path, query, delimiter, options, isNavigationEnabled);
     }
 
     // 向目标页面发送数据
@@ -53,42 +47,14 @@ export class UseEventBus {
     }
 
     /**
-     * 处理导航逻辑
-     * @param {string} navigationType 导航类型
-     * @param {string} path 目标路径
-     * @param {string} query 查询参数
-     * @param {string} delimiter 查询参数的分隔符
-     * @param {Object} options 选项参数
-     * @param {boolean} isNavigationEnabled 是否启用导航
-     */
-    static handleNavigation(navigationType, path, query, delimiter, options, isNavigationEnabled) {
-        if (!isNavigationEnabled) return;
-        if (navigationType !== UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO && navigationType !== UseEventBus.NAVIGATION_TYPES.SWITCH_TAB) {
-            return;
-        }
-
-        const fullPath = navigationType === UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO ? `${path}${query}` : path;
-
-        UseEventBus.platform[navigationType]({
-            url: fullPath,
-            fail: err => console.error(err),
-        });
-
-    }
-
-    /**
      * 发送页面事件，并根据需要进行导航
      * @param {object} config 配置对象
      * @param {string} [config.targetPath] 目标路径
      * @param {object} [config.options={}] 传递的数据
      * @param {string} [config.source=''] 自定义来源名称
      * @param {boolean} [config.prevPage=false] 开启上一页
-     * @param {boolean} [isNavigationEnabled=false] 是否启用导航
-     * @param {string} [navigationType=navigateTo] 导航类型
      */
-    async emit({targetPath, options = {}, source = '', prevPage = false},
-               isNavigationEnabled = false,
-               navigationType = UseEventBus.NAVIGATION_TYPES.NAVIGATE_TO) {
+    async emit({targetPath, options = {}, source = '', prevPage = false}) {
 
         const {currentRoute, prevPageRoute} = await UseEventBus.getRoute();
         if (prevPage && prevPageRoute) {
@@ -101,9 +67,7 @@ export class UseEventBus {
         return new Promise(resolve => {
             mergedOptions.thenCallback = resolve
             instanceEventBus.emit({event: 'GLOBAL_PAGES_EVENT', source: currentRoute, handler: 'handlerListener'}, {
-                navigationType,
                 targetPath,
-                isNavigationEnabled,
                 options: mergedOptions,
                 sourceName: source
             });

@@ -9,6 +9,9 @@ export class NextPage {
     static loadingObj = {loading: true}
 
     constructor(platform, reactive) {
+        /**
+         *  @type {{ stopPullDownRefresh: function(): void }}
+         * */
         NextPage.platform = platform
         // vue3 将数据变成响应式
         if (reactive) {
@@ -108,10 +111,15 @@ export class NextPage {
         }
 
         /**
+         * @typedef {Object} ResData
+         * @property {Array} rows - 响应数据的数组
+         * @property {number} total - 总条数
+         */
+        /**
          * 处理数据的函数
          * @param {Object} params - 包含数据的对象
-         * @param {Array|Object} [params.data=[]] - 数据数组，可以是数组或对象,默认为空数组
-         * @param {(Array|Object)} [params.resData=[]] - 响应数据，可以是数组或对象，默认为空数组
+         * @param {Array} [params.data=[]] - 数据数组，默认为空数组
+         * @param {Array} [params.resData=params.data] - 响应数据，默认为与 data 相同的数组
          * @param {number} total - 总条数
          */
         function resDataHandler({data = [], resData = []} = {}, total = 0) {
@@ -156,17 +164,17 @@ export class NextPage {
                 } else {
                     // 第1次加载最后的一页
                     if (!isLastPage) {
-                        console.log('第1次加载最后的一页')
+                        // console.log('第1次加载最后的一页')
                         isLastPage = true
                         return data.concat(resData);
                     } else {
                         // 第2次加载最后的一页
-                        console.log('第2次加载最后的一页')
+                        // console.log('第2次加载最后的一页')
                         loadMore = false
                         let startIndex = (pageInfoProxy.page - 1) * pageInfoProxy.pageSize
                         let dataLen = data.length
                         let delNum = dataLen - startIndex
-                        console.log({startIndex, dataLen, delNum})
+                        // console.log({startIndex, dataLen, delNum})
                         data.splice(startIndex, delNum, ...resData)
                         return data
                     }
