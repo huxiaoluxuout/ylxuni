@@ -196,6 +196,16 @@ export class NextPage {
             },
         }
 
+        /**
+         *
+         * @param {function} fn
+         */
+
+        function ylxSetInv(fn) {
+            ylxSetFn(fn)
+            ylxInvokeFn()
+        }
+
 
         return {
             ylxMixins: ylxMixins,
@@ -205,7 +215,8 @@ export class NextPage {
             ylxAddFn: ylxAddFn,
             ylxInvokeFn: ylxInvokeFn,
             ylxRefresh: reload,
-            ylxSetData: resDataHandler
+            ylxSetData: resDataHandler,
+            ylxSetInv: ylxSetInv,
         }
     }
 }
