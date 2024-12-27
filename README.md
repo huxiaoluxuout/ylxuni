@@ -113,7 +113,7 @@ function myOrder() {
 }
 
 ```
-#### `页面事件-发送消息-` - `开启页面跳转，并跳转到tabbar页面`
+#### `页面事件-发送消息-` - `并跳转到tabbar页面`
 
 ```
 function eventBusMine() {
@@ -121,7 +121,7 @@ function eventBusMine() {
   targetPath: '/pages/mine/mine',
   //prevPage:true,//上一页
   options: {age: 18}
-  }, true, 'switchTab')
+  })
 }
 
 ```
