@@ -23,26 +23,12 @@ export class NextPage {
 
     /**
      * 创建具有刷新和无限滚动功能的分页处理程序
-     * @param {object} pageInfo
+     * @param {{pageSize: number, page: number}} pageInfo
      * @param {number} pageInfo.page  -当前页码
      * @param {number}  pageInfo.pageSize- 分页大小
      * @param {object} [wxThis] - 原生微信的this
      * @param {string} [loadingKey = loading] - loadingKey
-     * @returns {{
-     *   ylxSetData: ((function({data?: [], resData?: []}, boolean): (*[]))|*),
-     *   ylxRefresh: function(): void,
-     *   ylxMixins: {
-     *     onReachBottom(): void,
-     *     onLoad(): void,
-     *     onPullDownRefresh(): void,
-     *   },
-     *   ylxAddFn: function(): void,
-     *   ylxSetFn: function(fn: Function): void,
-     *   ylxInvokeFn: function(fn: Function): void
-     *   ylxPageInfo: Object,
-     *   ylxReachBottom: function(): void,
-     *
-     * }}
+     * @returns {{ylxInvokeFn: invokeAllFunctions, ylxReachBottom: reachBottomHandler, ylxSetFn: replaceMainFunction, ylxAddFn: addUniqueFunction, ylxSetData: ((function({data?: Array, resData?: Array}=, number=): (Array))|*), ylxPageInfo: Object, ylxRefresh: reload, ylxSetInv: ylxSetInv, ylxMixins: {onReachBottom(): void, onLoad(): void, onPullDownRefresh(): void}}}
      */
     useNextPage(pageInfo = {page: 1, pageSize: 10}, wxThis, loadingKey = 'loading') {
         const that = this

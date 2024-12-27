@@ -45,6 +45,10 @@ export function createProxyObject(targetObject,) {
  * @param {string} dataKey
  * @param status
  */
+
+/**
+ *  @type {{ setData: function(): void }}
+ * */
 export function setWxData(wxThis, dataKey, status) {
     if (dataTypeJudge(wxThis, 'object')) {
         if (dataTypeJudge(wxThis.setData, 'function')) {
