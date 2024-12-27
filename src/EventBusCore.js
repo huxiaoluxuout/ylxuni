@@ -55,7 +55,7 @@ export class EventBusCore {
         }
 
         const listeners = this.eventListeners.get(eventName);
-        console.log('listeners', listeners)
+
         if (!listeners) {
             return;
         }
@@ -99,20 +99,6 @@ export class EventBusCore {
 
             }
         }
-    }
-
-    remove(path) {
-        return new Promise((resolve, reject) => {
-            let isDeleted = this.eventListeners.delete(path)
-            if (isDeleted) {
-                console.log('删除成功');
-                resolve()
-            } else {
-                reject()
-                console.log('删除失败，键不存在');
-            }
-        })
-
     }
 
     /**

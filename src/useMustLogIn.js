@@ -62,14 +62,15 @@ export class MustLogIn {
         })
     }
 
-    /**
-     * 处理用户登录拦截逻辑并返回一个拦截器。
-     * @param {Object} param - 登录拦截选项。
-     * @param {function} param.success - 用户已登录时的回调函数，必传。
-     * @param {function} param.fail - 用户未登录时的选项
-     * @returns {(function(...[*]): void)|*} 返回创建的拦截器对象。
-     */
 
+
+    /**
+     * 拦截器函数，用于处理目标对象的成功和错误回调。
+     * @param {Object} [options={}] - 选项对象
+     * @param {Function} [options.success] - 成功回调函数，默认值为一个空函数
+     * @param {Function} [options.fail] - 错误回调函数，默认值为一个空函数
+     * @returns {Function} - 创建的拦截器函数
+     */
     intercept({success = () => {}, fail = () => {}}={}) {
         const {createInterceptor} = useInterceptorProxy(MustLogIn.loginObject)
 

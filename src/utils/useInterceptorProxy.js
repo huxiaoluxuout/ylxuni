@@ -3,7 +3,7 @@ import {createProxyObject} from "./tools.js";
 /**
  * 创建一个代理对象的拦截器工具
  * @param {Object} targetObject - 需要代理的目标对象
- * @returns {Object} - 包含代理对象和拦截器函数的对象
+ * @returns {{ proxyObject: Object, createInterceptor: Function }} - 包含代理对象和拦截器函数的对象
  */
 export function useInterceptorProxy(targetObject) {
     const proxyObject = createProxyObject(targetObject);
