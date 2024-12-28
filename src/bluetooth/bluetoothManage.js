@@ -114,7 +114,7 @@ class BluetoothManager {
                     return;
                 }
 
-                let bluetoothDevices = res.devices.filter(item => (item.name === 'MA5011Pro'||item.localName === 'MA5011Pro'));
+                let bluetoothDevices = res.devices.filter(item => (item.name === 'LT5009NEW' || item.name === 'MA5011Pro' || item.localName === 'MA5011Pro'));
 
                 /*   let bluetoothDevices = res.devices.filter(item => {
                        if (item.name.trim() === 'MA5011Pro') {
@@ -287,6 +287,7 @@ class BluetoothManager {
             });
         });
     }
+
     // 读取数据
     static callbackFns = {
         red: {
@@ -311,7 +312,7 @@ class BluetoothManager {
      * @param {function} [readCallback] - 数据回调
      * @returns {Promise}
      */
-    write(instruction, writeUUID,readCallback) {
+    write(instruction, writeUUID, readCallback) {
         const {deviceId, serviceId} = BluetoothManager.connectDevice;
         // console.log('write', instruction, characteristicId)
         return new Promise((resolve, reject) => {
@@ -336,15 +337,14 @@ class BluetoothManager {
     }
 
 
-
     /**
      * 读取蓝牙数据
      * @param {string} readUUID 读取的特征uuid
      * @param {Function} readCallback
      * @param {Function} errCallback
      */
-    read(readUUID,readCallback,errCallback) {
-        if(!BluetoothManager.callbackFns.red.characteristicId){
+    read(readUUID, readCallback, errCallback) {
+        if (!BluetoothManager.callbackFns.red.characteristicId) {
             BluetoothManager.onDeviceData();
 
         }
@@ -353,7 +353,7 @@ class BluetoothManager {
         uni.readBLECharacteristicValue({
             deviceId,
             serviceId,
-            characteristicId:readUUID,
+            characteristicId: readUUID,
             success: (res) => {
                 // console.log('read',res)
                 BluetoothManager.callbackFns.red.characteristicId = readUUID
@@ -393,10 +393,10 @@ class BluetoothManager {
      */
     static onDeviceData() {
         let fullData = '';
-        const endMarker = '00'; // 根据实际情况设置结束标记
+        const endMarker = ''; // 根据实际情况设置结束标记
         uni.onBLECharacteristicValueChange(res => {
             const hexString = ab2hex(res.value);
-            console.log('hexString',hexString)
+            console.log('hexString', hexString)
             fullData += hexString;
             if (fullData.endsWith(endMarker)) {
                 if (BluetoothManager.callbackFns.red.characteristicId === res.characteristicId) {
@@ -410,39 +410,42 @@ class BluetoothManager {
             }
         });
     }
-
     /**
-     * 十进制数字转换为十六进制
-     * @param {number} decimalNumber
-     * @returns {}
+     * 将十进制数字转换为十六进制，并支持手动设置返回的字节数。
      *
+     * @param {number} decimalNumber - 要转换的十进制数字。
+     * @param {number} [byteCount=2] - 要返回的字节数，默认为 2。
+     * @returns {string} - 转换后的十六进制字符串，补足到指定字节数。
      */
+    decimalToHexWithPadding(decimalNumber, byteCount = 2) {
+        // 将十进制数字转换为十六进制，并转换为大写
+        let hexString = decimalNumber.toString(16).toUpperCase();
 
-    decimalToHexWithPadding(decimalNumber) {
-        if (typeof decimalNumber !== 'number' || !Number.isInteger(decimalNumber)) {
-            throw new Error('Input must be an integer.');
+        // 计算需要补足的长度
+        let requiredLength = byteCount * 2; // 每个字节需要两个十六进制字符
+        hexString = hexString.padStart(requiredLength, '0');
+
+        // 按字节分割
+        let result = [];
+        for (let i = 0; i < requiredLength; i += 2) {
+            result.push(hexString.slice(i, i + 2));
         }
 
-        // 将十进制数字转换为十六进制，并补足到至少四个字符长度
-        let hexString = decimalNumber.toString(16).toUpperCase().padStart(4, '0');
-
-        // 分割成高八位和低八位
-        let highByte = hexString.slice(0, 2);
-        let lowByte = hexString.slice(2, 4);
-
-        return highByte+lowByte ;
+        return result.join(''); // 返回拼接后的结果
     }
+
 }
 
 
 // 返回Promise对象
- function promisify(api) {
+function promisify(api) {
     return (options, ...params) => {
         return new Promise((resolve, reject) => {
-            api(Object.assign({}, options, { success: resolve, fail: reject }), ...params);
+            api(Object.assign({}, options, {success: resolve, fail: reject}), ...params);
         });
     }
 }
+
 // 16进制转成2进制
 function hexToArrayBuffer(instruction) {
     return new Uint8Array(instruction.match(/[\da-f]{2}/gi).map(ii => parseInt(ii, 16))).buffer
