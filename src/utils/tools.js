@@ -58,3 +58,31 @@ export function setWxData(wxThis, dataKey, status) {
         }
     }
 }
+/**
+ * 将回调式异步函数转换为 Promise 风格的异步函数
+ *
+ * @param {Function} fn - 传统回调式异步函数，该函数接收一个对象并调用 `success`, `fail`, `complete` 回调。
+ * @param {Object} [options={}] - 传递给 `fn` 的选项对象，具体内容根据 `fn` 的实现而定。
+ * @param {Function} [completeCallback] - 完成后的回调函数，无论操作成功或失败都会调用它。该回调接收一个参数 `res`，表示操作的最终结果或状态。
+ * @returns {Promise} 返回一个 `Promise` 对象，在异步操作成功时会调用 `resolve(res)`，失败时会调用 `reject(err)`。
+ *
+ */
+export function promisify(fn, options = {}, completeCallback) {
+    return new Promise((resolve, reject) => {
+        fn({
+            options,
+            success(res) {
+                resolve(res);
+            },
+            fail(err) {
+                reject(err);
+            },
+            complete(res) {
+                if (typeof completeCallback === 'function') {
+                    completeCallback(res);
+                }
+            }
+        });
+
+    });
+}
