@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nvm use 18.12.0 & rollup -c && yalc push",
     "build:bluetooth": "nvm use 18.12.0 & rollup -c rollup.config.bluetooth.js && yalc push",
+    "build:ylxTools": "nvm use 18.12.0 & rollup -c rollup.config.ylxTools.js && yalc push",
     "build:chooseImage": "nvm use 18.12.0 & rollup -c rollup.config.chooseImage.js && yalc push",
     "build:location": "nvm use 18.12.0 & rollup -c rollup.config.location.js && yalc push"
   },

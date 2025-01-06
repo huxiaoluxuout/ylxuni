@@ -322,8 +322,10 @@ export class BluetoothManager {
      * 重新搜索附近的蓝牙设备
      * @param {boolean} [remain=ture] - 开启直接自动连接
      * @param {number} [duration=1500] - 连接时间
+     * @param {function} [callback] -
+     * @param {function} [errCallback] -
      */
-    searchAgain(remain = true, duration = 1500) {
+    searchAgain(remain = true, duration = 1500, callback, errCallback) {
         return new Promise((resolveAgain, rejectAgain) => {
             function deviceSearch() {
                 return new Promise((resolve, reject) => {
@@ -331,12 +333,15 @@ export class BluetoothManager {
                 });
             }
 
-            deviceSearch().then(() => {
+            deviceSearch().then((devices) => {
+                resolveAgain(devices)
                 let {deviceId, connected} = BluetoothManager.connectDevice
                 if (remain && !connected) {
-                    this.connect(deviceId, duration).then(resolveAgain).catch(rejectAgain)
+                    if (dataTypeJudge(callback, 'function') && dataTypeJudge(errCallback, 'function')) {
+                        this.connect(deviceId, duration).then(callback).catch(errCallback)
+                    }
                 }
-            })
+            }).catch(rejectAgain)
         });
     }
 
