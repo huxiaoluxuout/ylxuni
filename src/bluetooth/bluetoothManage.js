@@ -168,6 +168,8 @@ export class BluetoothManager {
 
         return new Promise((resolve, reject) => {
             BluetoothManager.connectDevice.connectServiceInfo.serviceId = serviceId
+            BluetoothManager.connectDevice.deviceId = deviceId
+
             uni.getBLEDeviceCharacteristics({
                 deviceId,
                 serviceId,
@@ -276,6 +278,8 @@ export class BluetoothManager {
             serviceId,
             characteristicId: redCharacteristicId,
             success: () => {
+                console.error(`read-deviceId: ${deviceId}`);
+
                 BluetoothManager.red.redCharacteristicId = redCharacteristicId
                 BluetoothManager.red.callback = readCallback
             },
