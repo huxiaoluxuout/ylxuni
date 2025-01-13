@@ -299,7 +299,8 @@ export class BluetoothManager {
         uni.onBLECharacteristicValueChange(res => {
             const hexString = ab2hex(res.value);
             console.log(`000-hexString: ${hexString}`)
-            fullData += hexString;
+            // fullData += hexString;
+            fullData = hexString;
             if (fullData.endsWith(endMarker)) {
                 if (BluetoothManager.red.redCharacteristicId === res.characteristicId) {
                     BluetoothManager.red.callback(fullData)
