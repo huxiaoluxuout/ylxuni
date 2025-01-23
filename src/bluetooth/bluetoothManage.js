@@ -4,11 +4,13 @@ import {dataTypeJudge} from "../utils/dataTypeJudge.js";
 let searchTimeout = null
 let osName = 'ios'
 
+let deviceFoundCb = null
 
 /**
  * @class BluetoothManager
  * 该类用于管理蓝牙设备的连接、搜索和数据通信。
  */
+
 export class BluetoothManager {
     static connectionTimeout = null
 
@@ -49,10 +51,13 @@ export class BluetoothManager {
 
     /**
      * 初始化蓝牙模块
+     * @param {function} callback
      * @returns {Promise}
      */
 
-    initBle() {
+
+    initBle(callback) {
+        deviceFoundCb = callback
         return new Promise((resolve, reject) => {
             uni.openBluetoothAdapter({
                 success() {
@@ -114,14 +119,34 @@ export class BluetoothManager {
                 reject(err);
             },
             complete() {
-                /*停止蓝牙设备搜索*/
-                uni.stopBluetoothDevicesDiscovery({
-                    fail(err) {
-                        console.log(`停止蓝牙设备搜索: ${JSON.stringify({err: err})}`)
-                    }
-                });
+
+                if (dataTypeJudge(deviceFoundCb, 'function')) {
+                    uni.onBluetoothDeviceFound(function (res) {
+
+                        let bluetoothDevices = res.devices
+
+                        if (BluetoothManager.name) {
+                            bluetoothDevices = res.devices.filter(item => (item.name === BluetoothManager.name));
+                        }
+                        deviceFoundCb(bluetoothDevices)
+                        console.error(`新搜索到的设备: ${JSON.stringify({devices: res.devices})}`)
+                        // console.log('11111111', ab2hex(res.devices[0].advertisData))
+                    })
+                } else {
+                    /*停止蓝牙设备搜索*/
+                    uni.stopBluetoothDevicesDiscovery({
+                        fail(err) {
+                            console.log(`停止蓝牙设备搜索: ${JSON.stringify({err: err})}`)
+                        }
+                    });
+                }
+
             }
         });
+    }
+
+    scanDeviceFound() {
+
     }
 
 
@@ -191,9 +216,10 @@ export class BluetoothManager {
      * @param {string} characteristicId - 特征值的 uuid
      * @param {function} successCallback
      * @param {function} failCallback
+     * @param {deviceId} failCallback
      */
-    static startNotify(serviceId, characteristicId, successCallback, failCallback) {
-        const {deviceId} = BluetoothManager.connectDevice;
+    static startNotify({serviceId, characteristicId,deviceId}, successCallback, failCallback) {
+        // const {deviceId} = BluetoothManager.connectDevice;
         uni.notifyBLECharacteristicValueChange({
             state: true,
             deviceId,
@@ -214,7 +240,7 @@ export class BluetoothManager {
      * @param {number}  [duration=1500] - 连接时间 ms
      * @returns {Promise}
      */
-    connect(deviceId, duration = 1500) {
+    connect(deviceId, duration = 2500) {
         console.log(`deviceId：${deviceId}`)
         return new Promise((resolve, reject) => {
             uni.createBLEConnection({
@@ -237,13 +263,15 @@ export class BluetoothManager {
      * 向蓝牙设备写入指令
      * @param {string} instruction - 指令的16进制字符串
      * @param {string} writeCharacteristicId - 特征UUID
+     * @param {string} connectDeviceId -
      * @returns {Promise}
      */
-    write(instruction, writeCharacteristicId) {
-        const {deviceId, connectServiceInfo: {serviceId}} = BluetoothManager.connectDevice;
+    write({instruction, writeCharacteristicId, serviceId,deviceId}) {
+        // const {deviceId, connectServiceInfo: {serviceId}} = BluetoothManager.connectDevice;
+
         return new Promise((resolve, reject) => {
             uni.writeBLECharacteristicValue({
-                deviceId,
+                deviceId:deviceId,
                 serviceId,
                 characteristicId: writeCharacteristicId,
                 value: hexToArrayBuffer(instruction),
@@ -265,13 +293,15 @@ export class BluetoothManager {
      * @param {Function} readCallback
      * @param {Function} [errCallback = ()=>{}]
      * @param {string} [endMarker = ''] - 结束标记
+     * @param {string} connectDeviceId = '' - 结束标记
+     * @param {string} serviceId = '' - serviceId
      */
-    read(redCharacteristicId, readCallback, errCallback, endMarker = '') {
+    read({redCharacteristicId, deviceId, serviceId,}, readCallback, errCallback, endMarker = '') {
         if (!BluetoothManager.red.redCharacteristicId) {
             BluetoothManager.onBLECharacteristicValueChange(endMarker);
         }
 
-        const {deviceId, connectServiceInfo: {serviceId}} = BluetoothManager.connectDevice;
+        // const {deviceId, connectServiceInfo: {serviceId}} = BluetoothManager.connectDevice;
 
         uni.readBLECharacteristicValue({
             deviceId,
@@ -290,19 +320,37 @@ export class BluetoothManager {
         });
     }
 
+    onNotify(characteristicId, callback) {
+        BluetoothManager.onBLECharacteristicValueChange('', characteristicId, callback);
+    }
+
     /**
      * 接收蓝牙设备返回的数据
      * @param {string} [endMarker] - 结束标记
+     * @param {string} [characteristicId] -
+     * @param {function} [callback] -
      */
-    static onBLECharacteristicValueChange(endMarker = '') {
+    static onBLECharacteristicValueChange(endMarker = '', characteristicId, callback) {
         let fullData = '';
         uni.onBLECharacteristicValueChange(res => {
+
             const hexString = ab2hex(res.value);
-            console.log(`000-hexString: ${hexString}`)
+
+            const {deviceId, serviceId, characteristicId, value} = res;
+            // console.log(`收到特征值变化：${characteristicId}`);
+            // console.log(`000-hexString: ${hexString} -: ${characteristicId}`)
+
             // fullData += hexString;
             fullData = hexString;
+            if (dataTypeJudge(characteristicId, 'string') && dataTypeJudge(callback, 'function')) {
+                // console.log('onNotify-----')
+                callback(fullData, characteristicId,deviceId)
+
+            }
+
             if (fullData.endsWith(endMarker)) {
                 if (BluetoothManager.red.redCharacteristicId === res.characteristicId) {
+                    console.log('1111')
                     BluetoothManager.red.callback(fullData)
                 }
                 if (BluetoothManager.write.writeCharacteristicId === res.characteristicId) {
@@ -409,7 +457,7 @@ export class BluetoothManager {
     /**
      * 将十进制数字转换为十六进制，并支持手动设置返回的字节数。
      *
-     * @param {number} decimalNumber - 要转换的十进制数字。
+     * @param {number|string} decimalNumber - 要转换的十进制数字。
      * @param {number} [byteCount=2] - 要返回的字节数，默认为 2。
      * @returns {string} - 转换后的十六进制字符串，补足到指定字节数。
      */
