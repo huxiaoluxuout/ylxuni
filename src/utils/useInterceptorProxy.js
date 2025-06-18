@@ -1,4 +1,4 @@
-import {createProxyObject} from "./tools.js";
+import {createProxyObject} from "./createProxyObject.js";
 
 /**
  * 创建一个代理对象的拦截器工具

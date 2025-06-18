@@ -123,11 +123,11 @@ export class BluetoothManager {
                 if (dataTypeJudge(deviceFoundCb, 'function')) {
                     uni.onBluetoothDeviceFound(function (res) {
 
-                        let bluetoothDevices = res.devices
+                            let bluetoothDevices = res.devices
 
-                        if (BluetoothManager.name) {
-                            bluetoothDevices = res.devices.filter(item => (item.name === BluetoothManager.name));
-                        }
+                            if (BluetoothManager.name) {
+                                bluetoothDevices = res.devices.filter(item => (item.name === BluetoothManager.name));
+                            }
                         deviceFoundCb(bluetoothDevices)
                         console.error(`新搜索到的设备: ${JSON.stringify({devices: res.devices})}`)
                         // console.log('11111111', ab2hex(res.devices[0].advertisData))
@@ -175,7 +175,7 @@ export class BluetoothManager {
                 reject({ok: false, connectDevice: {}, err: err});
             }
         });
-    }
+    }Z
 
     /**
      * 更新蓝牙设备的服务和特征信息。

@@ -3,7 +3,7 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 
 export default {
-    input: './ylxTools.js',
+    input: './index_ylxTools.js',
     output: {
         file: 'dist/ylxuni.ylxTools.esm.js',
         format: 'esm',

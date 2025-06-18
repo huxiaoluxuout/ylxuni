@@ -1,6 +1,7 @@
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import {createProxyObject, setWxData} from "./utils/tools.js";
+import { setWxData} from "./utils/tools.js";
+import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class MustLogIn {
     static platform = null

@@ -15,40 +15,14 @@ export function parseUrl(pathUrl) {
     };
 }
 
-
-/**
- * 创建一个代理对象，用于拦截属性的访问和设置操作
- * @param {Object} targetObject - 需要代理的目标对象
- * @throws {TypeError} - 如果目标对象不是一个对象或为 null
- * @returns {Object} - 返回一个代理对象
- */
-export function createProxyObject(targetObject,) {
-
-    // 定义 Proxy 处理器
-    const proxyHandler = {
-        get(target, property, receiver) {
-            return Reflect.get(target, property, receiver);
-        },
-
-        set(target, property, value, receiver) {
-
-            return Reflect.set(target, property, value, receiver);
-        },
-    };
-
-    return new Proxy(targetObject, proxyHandler);
-}
-
 /**
  * 设置原生微信小程序
  * @param {object} wxThis
  * @param {string} dataKey
  * @param status
+ *  @type {{ setData: function(): void }}
  */
 
-/**
- *  @type {{ setData: function(): void }}
- * */
 export function setWxData(wxThis, dataKey, status) {
     if (dataTypeJudge(wxThis, 'object')) {
         if (dataTypeJudge(wxThis.setData, 'function')) {
@@ -85,4 +59,20 @@ export function promisify(fn, options = {}, completeCallback) {
         });
 
     });
+}
+
+export function debounce(func, delay) {
+    let timer; // 定时器
+    return function (...args) {
+        // 保持函数上下文
+        const context = this;
+
+        // 如果用户再次触发事件，清除之前的定时器
+        clearTimeout(timer);
+
+        // 设置新的定时器，延迟执行函数
+        timer = setTimeout(() => {
+            func.apply(context, args);
+        }, delay);
+    };
 }

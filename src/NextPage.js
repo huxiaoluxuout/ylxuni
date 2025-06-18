@@ -1,7 +1,7 @@
 import {useFunctionQueue} from "./utils/useFunctionQueue.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import {createProxyObject, setWxData} from "./utils/tools.js";
-
+import { setWxData} from "./utils/tools.js";
+import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class NextPage {
     static platform = null
@@ -48,7 +48,7 @@ export class NextPage {
 
         let isLastPage = false
         let loadMore = true
-        let a = []
+
 
         NextPage.pageInfo = {...pageInfo}
 
