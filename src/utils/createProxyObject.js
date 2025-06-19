@@ -1,12 +1,12 @@
 /**
  * 创建一个代理对象，用于拦截属性的访问和设置操作
- * @param {Object} targetObject - 需要代理的目标对象
+ * @param {Object} Object - 需要代理的普通对象
  * @throws {TypeError} - 如果目标对象不是一个对象或为 null
  * @returns {Object} - 返回一个代理对象
  */
-export function createProxyObject(targetObject,) {
+export function createProxyObject(Object,) {
 // 检查参数是否为对象
-    if (typeof targetObject !== 'object' || targetObject === null) {
+    if (typeof Object !== 'object' || Object === null) {
         throw new TypeError('Target must be an object');
     }
     // 定义 Proxy 处理器
@@ -21,5 +21,5 @@ export function createProxyObject(targetObject,) {
         },
     };
 
-    return new Proxy(targetObject, proxyHandler);
+    return new Proxy(Object, proxyHandler);
 }
