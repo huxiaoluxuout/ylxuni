@@ -7,6 +7,7 @@ export class NextPage {
     static platform = null
     static pageInfo = {page: 1, pageSize: 10}
     static loadingObj = {loading: true}
+    static dataCallback = ()=>{}
 
     constructor(platform, reactive) {
         /**
@@ -26,7 +27,7 @@ export class NextPage {
      * @param {{pageSize: number, page: number}} pageInfo
      * @param {number} pageInfo.page  -当前页码
      * @param {number}  pageInfo.pageSize- 分页大小
-     * @param {object} [wxThis] - 原生微信的this
+     * @param {object} [wxThis] - 原生微信的 this
      * @param {string} [loadingKey = loading] - loadingKey
      * @returns {{ylxInvokeFn: invokeAllFunctions, ylxReachBottom: reachBottomHandler, ylxSetFn: replaceMainFunction, ylxAddFn: addUniqueFunction, ylxSetData: ((function({data?: Array, resData?: Array}=, number=): (Array))|*), ylxPageInfo: Object, ylxRefresh: reload, ylxSetInv: ylxSetInv, ylxMixins: {onReachBottom(): void, onLoad(): void, onPullDownRefresh(): void}}}
      */
@@ -115,6 +116,7 @@ export class NextPage {
             setWxData(wxThis, loadingKey, false)
 
             if (!dataTypeJudge(data, 'array')) {
+                NextPage.dataCallback()
                 return resData
             }
 
@@ -139,12 +141,13 @@ export class NextPage {
                 if (isNextPage) {
                     pageInfoProxy.page += 1;
                 }
-
+                NextPage.dataCallback()
                 return resData
             } else {
 
                 if (isNextPage) {
                     pageInfoProxy.page += 1;
+                    NextPage.dataCallback()
                     return data.concat(resData);
 
                 } else {
@@ -152,6 +155,7 @@ export class NextPage {
                     if (!isLastPage) {
                         // console.log('第1次加载最后的一页')
                         isLastPage = true
+                        NextPage.dataCallback()
                         return data.concat(resData);
                     } else {
                         // 第2次加载最后的一页
@@ -162,6 +166,7 @@ export class NextPage {
                         let delNum = dataLen - startIndex
                         // console.log({startIndex, dataLen, delNum})
                         data.splice(startIndex, delNum, ...resData)
+                        NextPage.dataCallback()
                         return data
                     }
                 }
@@ -183,7 +188,7 @@ export class NextPage {
         }
 
         /**
-         *
+         * 立即调用
          * @param {function} fn
          */
 
