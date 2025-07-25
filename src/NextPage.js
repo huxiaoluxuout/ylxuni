@@ -1,13 +1,14 @@
 import {useFunctionQueue} from "./utils/useFunctionQueue.js";
 import {dataTypeJudge} from "./utils/dataTypeJudge.js";
-import { setWxData} from "./utils/tools.js";
+import {setWxData} from "./utils/tools.js";
 import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class NextPage {
     static platform = null
     static pageInfo = {page: 1, pageSize: 10}
     static loadingObj = {loading: true}
-    static dataCallback = ()=>{}
+    static dataCallback = () => {
+    }
 
     constructor(platform, reactive) {
         /**
@@ -197,6 +198,12 @@ export class NextPage {
             ylxInvokeFn()
         }
 
+        function dataCallback(fn) {
+            if (typeof fn === 'function') {
+                NextPage.dataCallback = fn
+            }
+        }
+
 
         return {
             ylxMixins: ylxMixins,
@@ -208,6 +215,7 @@ export class NextPage {
             ylxRefresh: reload,
             ylxSetData: resDataHandler,
             ylxSetInv: ylxSetInv,
+            ylxSetDataCallback: dataCallback,
         }
     }
 }
