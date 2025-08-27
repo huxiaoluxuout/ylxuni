@@ -5,6 +5,7 @@ import {createProxyObject} from "./utils/createProxyObject.js";
 
 export class NextPage {
     static platform = null
+    static emptyResData = false
     static pageInfo = {page: 1, pageSize: 10}
     static loadingObj = {loading: true}
     static dataCallback = () => {
@@ -84,7 +85,9 @@ export class NextPage {
         // 触底加载下一页数据
         function reachBottomHandler() {
             if (pageInfoProxy.page > 1 && loadMore) {
-                ylxInvokeFn();
+                if (!NextPage.emptyResData) {
+                    ylxInvokeFn();
+                }
             }
         }
 
@@ -125,6 +128,7 @@ export class NextPage {
             if (dataTypeJudge(data, 'array') && !dataTypeJudge(resData, 'array')) {
                 resData = []
             }
+            NextPage.emptyResData = resData.length === 0
 
             // 修复重新加载时，之前的数据没有清除的bug
             if (isByReload) {
