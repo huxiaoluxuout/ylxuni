@@ -1,5 +1,6 @@
 import {useInterceptorProxy} from "./utils/useInterceptorProxy.js";
 import {createProxyObject} from "./utils/createProxyObject.js";
+import {dataTypeJudge} from "./utils/dataTypeJudge.js";
 
 export class InterceptorFn {
     static platform = null
@@ -29,10 +30,10 @@ export class InterceptorFn {
      * @param {boolean} state - 拦截的key 的状态
      */
     setInterceptKey(key, state) {
-        if (this.interceptObject[key]) {
+        if (!dataTypeJudge(this.interceptObject[key],'undefined')) {
             this.interceptObject[key] = state
         } else {
-            console.error('未定义的key：' + key)
+            console.error(key + '未定义')
         }
     }
 
@@ -41,7 +42,7 @@ export class InterceptorFn {
      * @returns {boolean} - 拦截的key 的状态
      */
     getInterceptKey(key) {
-        return this.interceptObject[key] ? this.interceptObject[key] : key + ' -1'
+        return !dataTypeJudge(this.interceptObject[key],'undefined') ? this.interceptObject[key] : key + ' -1'
     }
 
     /**
@@ -52,11 +53,11 @@ export class InterceptorFn {
      * @param {String} [interceptKey] - 默认 login
      * @returns {Function} - 创建的拦截器函数
      */
-    intercept({
-                  success = () => {
-                  }, fail = () => {
-        }
-              } = {}, interceptKey) {
+    intercept({success = () => {}, fail = () => {}} = {}, interceptKey) {
+        // if (dataTypeJudge(this.interceptObject[interceptKey],'undefined')) {
+        //     console.error(interceptKey + '未定义')
+        //     return
+        // }
         const {createInterceptor} = useInterceptorProxy(InterceptorFn.interceptObject)
         return createInterceptor({
             onSuccess: success,

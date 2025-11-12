@@ -87,15 +87,15 @@ export default [
     },
     {
 
-        input: 'index_mustLogIn.js',
+        input: 'index_interceptor.js',
         output:[
             {
-                file: 'dist/ylxuni.mustLogIn.esm.js',
+                file: 'dist/ylxuni.Intercept.esm.js',
                 format: 'esm',
                 inlineDynamicImports: true,
             },
             {
-                file: 'dist/ylxuni.mustLogIn_wx.cjs.js',
+                file: 'dist/ylxuni.Intercept_wx.cjs.js',
                 format: 'cjs',
                 inlineDynamicImports: true,
             }

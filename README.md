@@ -1,6 +1,6 @@
 
 ## NodeJs 18.12.0
-### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxMustLogIn`
+### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxInterceptorCall`
 
 #### 复制 `dist/ylxuni.esm.js`文件到项目内。例如：`ylxuniCore`
 
@@ -17,7 +17,7 @@
 import {reactive} from 'vue'
 import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxuni(uni,reactive)
-export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
+export const { ylxEventBus, ylxInterceptorCall ,ylxNextPage} = ylxInstance
 
 ```
 
@@ -26,7 +26,7 @@ export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
 import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxuni(uni)
 
-export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
+export const { ylxEventBus, ylxInterceptorCall ,ylxNextPage} = ylxInstance
 ```
 
 ### 微信原生小程序 -  `useylxuni.js`
@@ -34,7 +34,7 @@ export const { ylxEventBus, ylxMustLogIn ,ylxNextPage} = ylxInstance
 const ylxuni =require("./ylxuni_wx.cjs")
 const ylxInstance = ylxuni(wx)
 
-export const { ylxEventBus, ylxMustLogIn,ylxNextPage} = ylxInstance
+export const { ylxEventBus,ylxNextPage} = ylxInstance
 
 ```
 
@@ -292,9 +292,9 @@ Page({
 
 ```
 ---
-### `ylxMustLogIn`
+### `ylxInterceptorCall`
 
-#### vue2 -`ylxMustLogIn`- `index.vue`
+#### vue2 -`ylxInterceptorCall`- `index.vue`
 
 ```
 <template>
@@ -308,12 +308,12 @@ Page({
 </template>
 <script>
 
-import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
+import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   
   export default {
     data() {
       return {
-         loginProxy:ylxMustLogIn.loginProxyObject
+         loginProxy:ylxInterceptorCall.interceptObject
       }
     },
     computed:{
@@ -323,11 +323,11 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
     },
     methods: {
       setToggle() {
-        ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
+        ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
       },
       
       toPage1(){
-        ylxMustLogIn.intercept({success:this.toPage})()
+        ylxInterceptorCall.intercept({success:this.toPage})()
       },
   
       toPage() {
@@ -339,7 +339,7 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
 </script>
 
 ```
-#### vue3 - `ylxMustLogIn`- `index.vue`
+#### vue3 - `ylxInterceptorCall`- `index.vue`
 
 ```
 <template>
@@ -351,17 +351,17 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
 
   import {ref, reactive} from 'vue';
   
-  import {ylxEventBus, ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
+  import {ylxEventBus, ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   
-  const loginProxy = ref(ylxMustLogIn.loginProxyObject)
-  const instanceMyOrderHandler = ylxMustLogIn.intercept({success: myOrder})
+  const loginProxy = ref(ylxInterceptorCall.interceptObject)
+  const instanceMyOrderHandler = ylxInterceptorCall.intercept({success: myOrder})
   const hasLogin = computed(()=>loginProxy.value.login)
   
   function setToggle() {
-    ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
+    ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
   }
   function interceptToPage(fn,...args) {
-    ylxMustLogIn.intercept({
+    ylxInterceptorCall.intercept({
       success: ()=>fn(...args),
       // fail:  ()=>ylxNavigateTo('/pages/login/login')
     })()
@@ -369,35 +369,29 @@ import {ylxMustLogIn} from "@/ylxuniCore/useylxuni.js";
   --------------------------------------------------------
   function setLoginToken() {
     const resData = loginRes.data
-      ylxMustLogIn.setLoginToken({
-        tokenKey:'token',
-        tokenData:resData.token
-      },()=>{
-        uni.navigateBack()
-    })
+    ylxInterceptorCall.setInterceptKey('login',true)
+    uni.navigateBack()
   }
   // 退出
   function signOut() {
-    ylxMustLogIn.unSetLoginToken(()=>{
-      ylxRedirectTo('/pages/index/index')
-    },'token')
+      ylxInterceptorCall.setInterceptKey('login',false)
   }
 </script>
 
 ```
-####  微信原生小程序 `ylxMustLogIn`
+####  微信原生小程序 `ylxInterceptorCall`
 
 ```
     myOrder() {
         console.log('登录后才打印。。。。。。')
     },
     instanceMyOrderHandler() {
-        ylxMustLogIn.intercept({success: this.myOrder})()
+        ylxInterceptorCall.intercept({success: this.myOrder})()
     },
     setToggle() {
-        ylxMustLogIn.loginProxyObject.login = !ylxMustLogIn.loginProxyObject.login
+        ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
         this.setData({
-            hasLogin: ylxMustLogIn.loginProxyObject.login,
+            hasLogin: ylxInterceptorCall.interceptObject.login,
         })
     }
 ```
