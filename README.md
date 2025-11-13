@@ -18,6 +18,11 @@ import {reactive} from 'vue'
 import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxuni(uni,reactive)
 export const { ylxEventBus, ylxInterceptorCall ,ylxNextPage} = ylxInstance
+export const InterceptKeys ={
+    login: false,// 登录
+    isVip: false,// 会员
+}
+ylxInterceptorCall.initInterceptKeys(InterceptKeys)
 
 ```
 
@@ -187,7 +192,6 @@ export default {
       }).then(res => {
         let resData = res.data
         this.incomeList = ylxSetData({data: this.incomeList, resData: resData.data}, resData.total)
-
       })
     }
   },
@@ -203,11 +207,6 @@ export default {
   
   const {ylxPageInfo, ylxReachBottom, ylxSetFn, ylxAddFn, ylxInvokeFn, ylxRefresh, ylxSetData} = ylxNextPage.useNextPage({page: 1, pageSize: 10})
 
-  /*--------------------------loading---------------------------------*/
-  const loadingProxy = ref(ylxNextPage.loadingProxyObject)
-  const hasLoading = computed(() => loadingProxy.value.loading)
-  /*--------------------------loading---------------------------------*/
-  
   const incomeList = ref([])
    getNoticeListApi() {
         getNoticeList({
@@ -313,7 +312,7 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   export default {
     data() {
       return {
-         loginProxy:ylxInterceptorCall.interceptObject
+         loginProxy:ylxInterceptorCall.getIntercept
       }
     },
     computed:{
@@ -323,7 +322,7 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
     },
     methods: {
       setToggle() {
-        ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
+        ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
       },
       
       toPage1(){
@@ -353,17 +352,17 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   
   import {ylxEventBus, ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   
-  const loginProxy = ref(ylxInterceptorCall.interceptObject)
   const instanceMyOrderHandler = ylxInterceptorCall.intercept({success: myOrder})
-  const hasLogin = computed(()=>loginProxy.value.login)
+  const hasLogin = computed(() => ylxInterceptorCall.getIntercept.login)
+
   
   function setToggle() {
-    ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
+    ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
   }
   function interceptToPage(fn,...args) {
     ylxInterceptorCall.intercept({
       success: ()=>fn(...args),
-      // fail:  ()=>ylxNavigateTo('/pages/login/login')
+      fail:  ()=>ylxNavigateTo('/pages/login/login')
     })()
   }
   --------------------------------------------------------
@@ -389,9 +388,9 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
         ylxInterceptorCall.intercept({success: this.myOrder})()
     },
     setToggle() {
-        ylxInterceptorCall.interceptObject.login = !ylxInterceptorCall.interceptObject.login
+        ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
         this.setData({
-            hasLogin: ylxInterceptorCall.interceptObject.login,
+            hasLogin: ylxInterceptorCall.getIntercept.login,
         })
     }
 ```

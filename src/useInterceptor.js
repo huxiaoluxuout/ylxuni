@@ -17,12 +17,15 @@ export class InterceptorFn {
      * @param {object} interceptKeys - 拦截的key
      */
     initInterceptKeys(interceptKeys) {
-        InterceptorFn.interceptObject = interceptKeys
+        let interceptObject = {}
         // vue3 将数据变成响应式
         if (InterceptorFn.vue3Reactive) {
-            InterceptorFn.interceptObject = InterceptorFn.vue3Reactive(InterceptorFn.interceptObject)
+            interceptObject = InterceptorFn.vue3Reactive(interceptKeys)
         }
-        this.interceptObject = createProxyObject(InterceptorFn.interceptObject)
+        InterceptorFn.interceptObject = createProxyObject(interceptObject)
+    }
+    static tool(key){
+        return !dataTypeJudge(InterceptorFn.interceptObject[key], 'undefined')
     }
 
     /**
@@ -30,8 +33,8 @@ export class InterceptorFn {
      * @param {boolean} state - 拦截的key 的状态
      */
     setInterceptKey(key, state) {
-        if (!dataTypeJudge(this.interceptObject[key],'undefined')) {
-            this.interceptObject[key] = state
+        if (InterceptorFn.tool(key)) {
+            InterceptorFn.interceptObject[key] = state
         } else {
             console.error(key + '未定义')
         }
@@ -42,7 +45,16 @@ export class InterceptorFn {
      * @returns {boolean} - 拦截的key 的状态
      */
     getInterceptKey(key) {
-        return !dataTypeJudge(this.interceptObject[key],'undefined') ? this.interceptObject[key] : key + ' -1'
+        return InterceptorFn.tool(key) ? InterceptorFn.interceptObject[key] : key + '-1'
+    }
+
+
+    /**
+     * 获取所有拦截对象
+     * @returns {Object}
+     */
+    get getIntercept() {
+        return InterceptorFn.interceptObject
     }
 
     /**
@@ -54,10 +66,10 @@ export class InterceptorFn {
      * @returns {Function} - 创建的拦截器函数
      */
     intercept({success = () => {}, fail = () => {}} = {}, interceptKey) {
-        // if (dataTypeJudge(this.interceptObject[interceptKey],'undefined')) {
-        //     console.error(interceptKey + '未定义')
-        //     return
-        // }
+        if (!InterceptorFn.tool(interceptKey)) {
+            console.error(interceptKey + '未定义')
+            return
+        }
         const {createInterceptor} = useInterceptorProxy(InterceptorFn.interceptObject)
         return createInterceptor({
             onSuccess: success,
