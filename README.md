@@ -1,6 +1,6 @@
 
 ## NodeJs 18.12.0
-### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxInterceptorCall`
+### `uniapp`常用方法封装  `ylxNextPage` `ylxEventBus` `ylxInterceptor`
 
 #### 复制 `dist/ylxuni.esm.js`文件到项目内。例如：`ylxuniCore`
 
@@ -17,12 +17,12 @@
 import {reactive} from 'vue'
 import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxuni(uni,reactive)
-export const { ylxEventBus, ylxInterceptorCall ,ylxNextPage} = ylxInstance
+export const { ylxEventBus, ylxInterceptor ,ylxNextPage} = ylxInstance
 export const InterceptKeys ={
     login: false,// 登录
     isVip: false,// 会员
 }
-ylxInterceptorCall.initInterceptKeys(InterceptKeys)
+ylxInterceptor.initIntercepts(InterceptKeys)
 
 ```
 
@@ -31,7 +31,7 @@ ylxInterceptorCall.initInterceptKeys(InterceptKeys)
 import ylxuni from "@/ylxuniCore/ylxuni.esm.js"
 const ylxInstance = ylxuni(uni)
 
-export const { ylxEventBus, ylxInterceptorCall ,ylxNextPage} = ylxInstance
+export const { ylxEventBus, ylxInterceptor ,ylxNextPage} = ylxInstance
 ```
 
 ### 微信原生小程序 -  `useylxuni.js`
@@ -291,9 +291,9 @@ Page({
 
 ```
 ---
-### `ylxInterceptorCall`
+### `ylxInterceptor`
 
-#### vue2 -`ylxInterceptorCall`- `index.vue`
+#### vue2 -`ylxInterceptor`- `index.vue`
 
 ```
 <template>
@@ -307,12 +307,12 @@ Page({
 </template>
 <script>
 
-import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
+import {ylxInterceptor} from "@/ylxuniCore/useylxuni.js";
   
   export default {
     data() {
       return {
-         loginProxy:ylxInterceptorCall.getIntercept
+         loginProxy:ylxInterceptor.getIntercepts
       }
     },
     computed:{
@@ -322,11 +322,11 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
     },
     methods: {
       setToggle() {
-        ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
+        ylxInterceptor.setIntercept('login', !ylxInterceptor.getInterceptState('login'))
       },
       
       toPage1(){
-        ylxInterceptorCall.intercept({success:this.toPage})()
+        ylxInterceptor.intercept({success:this.toPage})()
       },
   
       toPage() {
@@ -338,7 +338,7 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
 </script>
 
 ```
-#### vue3 - `ylxInterceptorCall`- `index.vue`
+#### vue3 - `ylxInterceptor`- `index.vue`
 
 ```
 <template>
@@ -350,17 +350,17 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
 
   import {ref, reactive} from 'vue';
   
-  import {ylxEventBus, ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
+  import {ylxEventBus, ylxInterceptor} from "@/ylxuniCore/useylxuni.js";
   
-  const instanceMyOrderHandler = ylxInterceptorCall.intercept({success: myOrder})
-  const hasLogin = computed(() => ylxInterceptorCall.getIntercept.login)
+  const instanceMyOrderHandler = ylxInterceptor.intercept({success: myOrder})
+  const hasLogin = computed(() => ylxInterceptor.getIntercepts.login)
 
   
   function setToggle() {
-    ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
+    ylxInterceptor.setIntercept('login', !ylxInterceptor.getInterceptState('login'))
   }
   function interceptToPage(fn,...args) {
-    ylxInterceptorCall.intercept({
+    ylxInterceptor.intercept({
       success: ()=>fn(...args),
       fail:  ()=>ylxNavigateTo('/pages/login/login')
     })()
@@ -368,29 +368,29 @@ import {ylxInterceptorCall} from "@/ylxuniCore/useylxuni.js";
   --------------------------------------------------------
   function setLoginToken() {
     const resData = loginRes.data
-    ylxInterceptorCall.setInterceptKey('login',true)
+    ylxInterceptor.setIntercept('login',true)
     uni.navigateBack()
   }
   // 退出
   function signOut() {
-      ylxInterceptorCall.setInterceptKey('login',false)
+      ylxInterceptor.setIntercept('login',false)
   }
 </script>
 
 ```
-####  微信原生小程序 `ylxInterceptorCall`
+####  微信原生小程序 `ylxInterceptor`
 
 ```
     myOrder() {
         console.log('登录后才打印。。。。。。')
     },
     instanceMyOrderHandler() {
-        ylxInterceptorCall.intercept({success: this.myOrder})()
+        ylxInterceptor.intercept({success: this.myOrder})()
     },
     setToggle() {
-        ylxInterceptorCall.setInterceptKey('login', !ylxInterceptorCall.getInterceptKey('login'))
+        ylxInterceptor.setIntercept('login', !ylxInterceptor.getInterceptState('login'))
         this.setData({
-            hasLogin: ylxInterceptorCall.getIntercept.login,
+            hasLogin: ylxInterceptor.getIntercepts.login,
         })
     }
 ```

@@ -10,13 +10,13 @@ export class InterceptorFn {
     constructor(platform, reactive) {
         InterceptorFn.platform = platform
         InterceptorFn.vue3Reactive = reactive
-        this.initInterceptKeys({login: false})
+        this.initIntercepts({login: false})
     }
 
     /**
      * @param {object} interceptKeys - 拦截的key
      */
-    initInterceptKeys(interceptKeys) {
+    initIntercepts(interceptKeys) {
         let interceptObject = {}
         // vue3 将数据变成响应式
         if (InterceptorFn.vue3Reactive) {
@@ -32,7 +32,7 @@ export class InterceptorFn {
      * @param {string} key - 拦截的key
      * @param {boolean} state - 拦截的key 的状态
      */
-    setInterceptKey(key, state) {
+    setIntercept(key, state) {
         if (InterceptorFn.tool(key)) {
             InterceptorFn.interceptObject[key] = state
         } else {
@@ -44,7 +44,7 @@ export class InterceptorFn {
      * @param {string} key - 拦截的key
      * @returns {boolean} - 拦截的key 的状态
      */
-    getInterceptKey(key) {
+    getInterceptState(key) {
         return InterceptorFn.tool(key) ? InterceptorFn.interceptObject[key] : key + '-1'
     }
 
@@ -53,7 +53,7 @@ export class InterceptorFn {
      * 获取所有拦截对象
      * @returns {Object}
      */
-    get getIntercept() {
+    get getIntercepts() {
         return InterceptorFn.interceptObject
     }
 
