@@ -18,7 +18,7 @@ function initModule(platform=uni,vue3Reactive) {
     return {
         ylxEventBus: new UseEventBus(platform),
         ylxNextPage: new NextPage(platform,vue3Reactive),
-        ylxInterceptor: new InterceptorCall(platform,vue3Reactive),
+        ylxIntercept: new InterceptorCall(platform,vue3Reactive),
 
 
         // ylxChooseImage: chooseImage,
